@@ -1,0 +1,1757 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Vista Geral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --bg:#F1F5FA; --surface:#FFFFFF; --surface-alt:#E7EEF6; --border:#D2DDEA;
+    --ink:#0F1B2D; --muted:#5B6B80; --muted2:#82909F; --accent:#15529E; --accent-ink:#FFFFFF;
+    --amber-fg:#8A6A06; --red-fg:#AE2043; --red-bg:#FBE9EE; --red-border:#F1C0CE;
+    --success-fg:#146B52;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#0E1520; --surface:#161F2D; --surface-alt:#1A2434; --border:#293748; --ink:#E9EEF5; --muted:#96A3B5; --muted2:#748097; }
+  }
+  :root[data-theme="dark"] { --bg:#0E1520; --surface:#161F2D; --surface-alt:#1A2434; --border:#293748; --ink:#E9EEF5; --muted:#96A3B5; --muted2:#748097; }
+  * { box-sizing: border-box; }
+  html,body { margin: 0; height:100%; }
+  body { background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  input, select, button { font-family: inherit; }
+  a { color: var(--accent); }
+  .eyebrow { font-size:10.5px; text-transform:uppercase; letter-spacing:0.09em; font-weight:700; color:var(--muted2); }
+  .seg-group { display:flex; background:var(--border); border-radius:6px; padding:3px; }
+  .seg-btn { border:none; background:transparent; color:var(--muted); padding:5px 12px; font-size:12px; font-weight:700; border-radius:4px; cursor:pointer; }
+  .seg-btn.active { background:var(--ink); color:var(--bg); }
+  .nav-btn { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#8DA3BC; background:transparent; border:none; padding:0; }
+  .nav-btn.active { background:var(--accent); color:#fff; }
+  .nav-btn:hover:not(.active) { background:rgba(255,255,255,0.06); }
+  .tag { display:inline-flex; align-items:center; gap:5px; padding:2px 7px; border-radius:4px; font-size:10.5px; font-weight:700; border:1px solid transparent; white-space:nowrap; }
+  .chip { display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:2px 7px; border-radius:4px; color:#fff; font-weight:600; letter-spacing:0.01em; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; transition: box-shadow .18s ease, border-color .18s ease; }
+  .card:hover { box-shadow: 0 6px 20px rgba(10,20,35,0.09); }
+  .card.linked { border-color:#7FA8D6; box-shadow: 0 0 0 2px rgba(174,32,67,0.28); }
+  .itemTitle { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; font-weight: 700; line-height:1.25; }
+  .actionRow { padding: 10px 2px; border-top: 1px solid var(--border); transition: background .18s ease; border-radius:4px; }
+  .actionRow.linked { background: var(--red-bg); box-shadow: inset 0 0 0 1px var(--red-border); }
+  .depDot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex:0 0 6px; }
+  .statusSelect { border: 1px solid var(--border); border-radius: 5px; padding: 3px 20px 3px 8px; font-size: 10.5px; font-weight: 700;
+    background-color: transparent; color: var(--ink); cursor: pointer; appearance: none; -webkit-appearance:none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%230F1B2D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat; background-position:right 6px center; background-size:8px; }
+  .statusSelect--filled { border-color: var(--red-border); background-color: var(--red-bg); color: var(--red-fg); }
+  .btn { border: 1px solid transparent; border-radius: 6px; padding: 8px 15px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn-accent { background: var(--accent); color: var(--accent-ink); }
+  .btn-line { background: transparent; border-color: var(--border); color: var(--muted); }
+  .btn-ghost { background:none; border:none; color:var(--accent); padding:0; font-size:12px; font-weight:700; cursor:pointer; }
+  .linkChip { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--red-fg); background:none; border:none; padding:0; cursor:pointer; border-bottom:1px dashed var(--red-border); }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 11px; }
+  .field label { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .field input, .field select { border: 1px solid var(--border); border-radius: 5px; padding: 7px 10px; font-size: 13px; background: var(--surface); color: var(--ink); }
+  .colHeader { padding: 4px 2px 12px; border-bottom: 2px solid; margin-bottom:16px; }
+  .toolbar { flex:0 0 auto; display:flex; align-items:center; padding:0 30px; background:var(--surface); }
+  ::placeholder { color: var(--muted2); }
+  ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:6px; }
+</style>
+</head>
+<body>
+
+<div id="loginOverlay" style="display:flex; position:fixed; inset:0; background:var(--bg); align-items:center; justify-content:center; z-index:60;">
+  <div style="width:340px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:28px 26px;">
+    <div style="font-size:19px; font-weight:700; margin-bottom:4px;">Vista Geral</div>
+    <div style="font-size:12px; color:var(--muted2); margin-bottom:20px;">entre com a conta criada no Supabase</div>
+    <div class="field"><label>E-mail</label><input id="loginEmail" type="email"></div>
+    <div class="field"><label>Senha</label><input id="loginPass" type="password"></div>
+    <div id="loginError" style="font-size:12px; color:var(--red-fg); margin-bottom:8px; display:none;"></div>
+    <button id="btnLogin" class="btn btn-accent" style="width:100%; margin-top:6px;">Entrar</button>
+  </div>
+</div>
+
+<div id="appRoot" style="display:none; flex-direction:row; height:100vh; overflow:hidden;">
+
+  <div id="navRail" style="width:58px; flex:0 0 58px; background:var(--ink); display:flex; flex-direction:column; align-items:center; padding:18px 0; gap:10px;">
+    <svg width="24" height="24" viewBox="0 0 26 26" style="flex:0 0 24px; margin-bottom:10px;">
+      <circle cx="6" cy="20" r="3" fill="var(--accent)"></circle><circle cx="20" cy="6" r="3" fill="#8DA3BC"></circle>
+      <circle cx="20" cy="20" r="3" fill="none" stroke="var(--accent)" stroke-width="2"></circle>
+      <line x1="8.4" y1="18.2" x2="17.6" y2="7.8" stroke="#33465F" stroke-width="1.6"></line>
+      <line x1="8.4" y1="20" x2="17" y2="20" stroke="#33465F" stroke-width="1.6"></line>
+    </svg>
+
+    <button type="button" class="nav-btn" data-view="portfolio" title="Portfólio — Programas">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+    </button>
+    <button type="button" class="nav-btn" data-view="board" title="Quadro">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+    </button>
+    <button type="button" class="nav-btn" data-view="flow" title="Fluxograma">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle><circle cx="12" cy="18" r="2.5"></circle><line x1="8" y1="7" x2="16" y2="7"></line><line x1="7" y1="8.3" x2="11" y2="16"></line><line x1="17" y1="8.3" x2="13" y2="16"></line></svg>
+    </button>
+    <button type="button" class="nav-btn" data-view="completed" title="Concluídos">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="8 12 11 15 16 9"></polyline></svg>
+    </button>
+
+    <div style="flex:1;"></div>
+
+    <button type="button" id="btnToggleRadar" class="nav-btn" title="Radar de Atenção">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="7" x2="12" y2="12"></line><line x1="12" y1="12" x2="15.5" y2="14.5"></line></svg>
+    </button>
+    <button type="button" class="nav-btn" title="Configurações (em breve)" style="opacity:0.4; cursor:default;" disabled>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+    </button>
+  </div>
+
+  <div style="flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative;">
+
+  <div class="toolbar" style="height:60px; justify-content:space-between; border-bottom:1px solid var(--border);">
+    <div style="display:flex; align-items:center; gap:13px;">
+      <div>
+        <div id="pageTitle" style="font-size:19px; font-weight:700; line-height:1;">Portfólio</div>
+        <div id="syncStatus" style="font-size:11px; color:var(--muted2); margin-top:3px;">conectado ao banco de dados</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <input id="searchInput" type="text" placeholder="buscar..." style="border:1px solid var(--border); border-radius:6px; padding:7px 12px; font-size:13px; width:170px; background:var(--surface-alt); color:var(--ink);">
+      <button id="btnNovo" class="btn btn-accent">+ Novo projeto</button>
+      <button id="btnNovoContainer" class="btn btn-line">+ Programa/Eixo</button>
+      <button id="btnRefresh" class="btn btn-line" title="Recarregar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      </button>
+      <button id="btnLogout" class="btn btn-line">Sair</button>
+    </div>
+  </div>
+
+  <div class="toolbar" id="boardSettingsRow" style="height:46px; gap:16px; background:var(--surface-alt); border-bottom:1px solid var(--border);">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span class="eyebrow">Conexões</span>
+      <div class="seg-group">
+        <button id="btnConnHover" class="seg-btn" data-group="connectionMode" data-val="hover">Ao passar mouse</button>
+        <button id="btnConnAlways" class="seg-btn" data-group="connectionMode" data-val="always">Sempre visíveis</button>
+      </div>
+    </div>
+    <div style="width:1px; align-self:stretch; background:var(--border);"></div>
+    <select id="filterStatus" style="border:1px solid var(--border); border-radius:6px; padding:5px 8px; font-size:12px; background:var(--surface); color:var(--ink);"></select>
+    <select id="filterDependsOn" style="border:1px solid var(--border); border-radius:6px; padding:5px 8px; font-size:12px; background:var(--surface); color:var(--ink);">
+      <option value="all">Depende de: todos</option><option value="eu">Você</option><option value="terceiro">Terceiro</option><option value="ninguem">Ninguém</option>
+    </select>
+    <select id="filterResponsible" style="border:1px solid var(--border); border-radius:6px; padding:5px 8px; font-size:12px; background:var(--surface); color:var(--ink);"></select>
+    <button id="btnClearFilters" class="btn-ghost">limpar</button>
+    <div id="focusBadge" style="display:none; margin-left:auto; align-items:center; gap:8px;"></div>
+  </div>
+
+  <div class="toolbar" id="bigNumbers" style="height:48px; gap:28px; border-bottom:1px solid var(--border);"></div>
+
+  <div style="flex: 1; display: flex; overflow: hidden; position:relative;">
+    <div id="portfolioWrap" style="display:block; flex:1; overflow:auto; padding:28px 32px;"></div>
+    <div id="board" style="display:none; flex:1; overflow:auto; padding:28px 32px;">
+      <div id="boardInner" style="position:relative;">
+        <svg id="connectorSvg" style="position:absolute; top:0; left:0; pointer-events:none; overflow:visible;"></svg>
+        <div id="columns" style="display:flex; align-items:flex-start; position:relative;"></div>
+      </div>
+    </div>
+    <div id="flowWrap" style="display:none; flex:1; overflow:auto; padding:28px 32px; background:var(--surface-alt);">
+      <div id="flowchartCanvas"></div>
+    </div>
+    <div id="completedWrap" style="display:none; flex:1; overflow:auto; padding:28px 32px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+        <span style="font-size:16px; font-weight:700;">Itens concluídos</span>
+        <select id="completedContainer" style="border:1px solid var(--border); border-radius:6px; padding:6px 9px; font-size:12px; background:var(--surface); color:var(--ink);"></select>
+        <label style="font-size:12px; color:var(--muted);">de <input id="completedFrom" type="month" style="border:1px solid var(--border); border-radius:6px; padding:5px 8px; font-size:12px; background:var(--surface); color:var(--ink);"></label>
+        <label style="font-size:12px; color:var(--muted);">até <input id="completedTo" type="month" style="border:1px solid var(--border); border-radius:6px; padding:5px 8px; font-size:12px; background:var(--surface); color:var(--ink);"></label>
+        <button id="btnCompletedClear" class="btn-ghost">limpar filtro</button>
+      </div>
+      <div id="completedSummary" style="display:flex; gap:26px; margin-bottom:20px;"></div>
+      <div id="completedList" style="max-width:760px;"></div>
+    </div>
+
+    <div id="radarBackdrop" style="display:none; position:absolute; inset:0; background:rgba(10,15,25,0.25); z-index:39;"></div>
+    <div id="radarDrawer" style="position:absolute; top:0; right:0; height:100%; width:320px; background:var(--surface); border-left:1px solid var(--border); overflow-y:auto; padding:22px 20px; transform:translateX(100%); transition:transform .22s ease; z-index:40; box-shadow:-8px 0 24px rgba(10,15,25,0.12);">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-size:16px; font-weight:700;">Radar de Atenção</div>
+        <button id="btnCloseRadar" style="border:none; background:none; cursor:pointer; color:var(--muted); padding:4px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div style="font-size:11.5px; color:var(--muted2); margin-bottom:18px;">calculado a partir dos dados do banco</div>
+      <div id="radar"></div>
+    </div>
+  </div>
+
+  </div>
+</div>
+
+<div id="containerFormOverlay" style="display:none; position:fixed; inset:0; background:rgba(10,15,25,0.5); align-items:center; justify-content:center; z-index:50;">
+  <div style="background:var(--surface); border-radius:10px; padding:24px 26px; width:340px; border:1px solid var(--border);">
+    <div id="containerFormTitle" style="font-size:18px; font-weight:700; margin-bottom:15px;">Novo Programa/Eixo</div>
+    <div class="field"><label>Nome</label><input id="cName" type="text" placeholder="ex: Captacao de Recursos" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="field"><label>Zona deste Programa (opcional — ex: Transversal)</label><input id="cZone" type="text" placeholder="ex: Transversal" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="field">
+      <label>Zonas para organizar os projetos deste Programa</label>
+      <div id="cZonesList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+      <div style="display:flex; gap:6px;">
+        <input id="cZoneNew" type="text" placeholder="ex: Operação" autocapitalize="off" autocorrect="off" spellcheck="false" style="flex:1; border:1px solid var(--border); border-radius:5px; padding:7px 10px; font-size:13px; background:var(--surface); color:var(--ink);">
+        <button type="button" id="cZoneAdd" class="btn btn-line" style="padding:7px 12px;">+ Adicionar</button>
+      </div>
+    </div>
+    <div class="field"><label>No Fluxograma, aparece como</label>
+      <select id="cOrientation"><option value="horizontal">Banda horizontal (padrão)</option><option value="vertical">Faixa vertical à direita (para eixos transversais, ex: Publicações)</option></select>
+    </div>
+    <div class="field"><label>Altura da banda no Fluxograma (px)</label><input id="cLaneHeight" type="number" min="140" step="10" placeholder="260"></div>
+    <div class="field"><label>Subtítulo (opcional)</label><input id="cSubtitle" type="text" placeholder="ex: breve descrição" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="field"><label>Cor</label><input id="cColor" type="color" value="#15529E" style="height:38px; padding:3px;"></div>
+    <div id="containerFormError" style="font-size:12px; color:var(--red-fg); margin-bottom:6px; display:none;"></div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button id="cDelete" class="btn" style="display:none; background:var(--red-bg); color:var(--red-fg); border:1px solid var(--red-border);">Excluir</button>
+      <button id="cCancel" class="btn btn-line" style="flex:1;">Cancelar</button>
+      <button id="cSave" class="btn btn-accent" style="flex:1;">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="depFormOverlay" style="display:none; position:fixed; inset:0; background:rgba(10,15,25,0.5); align-items:center; justify-content:center; z-index:50;">
+  <div style="background:var(--surface); border-radius:10px; padding:24px 26px; width:380px; border:1px solid var(--border);">
+    <div style="font-size:18px; font-weight:700; margin-bottom:4px;">Vincular dependência</div>
+    <div style="font-size:12.5px; color:var(--muted2); margin-bottom:16px;">Item travado: <strong id="depTargetName" style="color:var(--ink);"></strong></div>
+    <div class="field"><label>Travado por</label><select id="depSourceSelect"></select></div>
+    <div class="field"><label>Tipo</label>
+      <select id="depKind"><option value="bloqueio">Bloqueia — o item de destino fica "Bloqueado"</option><option value="encadeamento">Apenas encadeamento — mostra o fluxo, sem bloquear</option></select>
+    </div>
+    <div class="field"><label>Motivo (opcional)</label><input id="depReason" type="text" placeholder="ex: aguardando dado consolidado" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div id="depFormError" style="font-size:12px; color:var(--red-fg); margin-bottom:6px; display:none;"></div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button id="depCancel" class="btn btn-line" style="flex:1;">Cancelar</button>
+      <button id="depSave" class="btn btn-accent" style="flex:1;">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="formOverlay" style="display:none; position:fixed; inset:0; background:rgba(10,15,25,0.5); align-items:center; justify-content:center; z-index:50;">
+  <div style="background:var(--surface); border-radius:10px; padding:24px 26px; width:380px; max-height:86vh; overflow:auto; border:1px solid var(--border);">
+    <div id="fTitle" style="font-size:18px; font-weight:700; margin-bottom:15px;">Novo projeto</div>
+    <div class="field"><label>Nome</label><input id="fName" type="text" placeholder="Nome do item" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="field"><label>Tipo</label>
+      <select id="fType"><option>Projeto</option><option>Publicacao</option><option>Orientacao</option><option>Processo de Prestacao de Contas</option><option>Proposta/Edital</option><option>Atividade recorrente</option></select>
+    </div>
+    <div class="field"><label>Programa(s)/Eixo(s)</label><div id="fContainers" style="display:flex; flex-direction:column; gap:6px;"></div></div>
+    <div class="field"><label>Responsável</label><input id="fResp" type="text" placeholder="ex: Evandro" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="field"><label>Equipe (nomes separados por vírgula)</label><input id="fTeam" type="text" placeholder="ex: Karina, Sabrina, Celly" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="field"><label>Zona dentro do Programa (opcional)</label>
+      <select id="fZone"></select>
+      <div id="fZoneHint" style="font-size:10.5px; color:var(--muted2); margin-top:4px;"></div>
+    </div>
+    <div class="field"><label>Próxima ação depende de</label><select id="fDep"><option value="eu">Você</option><option value="terceiro">Terceiro</option><option value="ninguem">Ninguém no momento</option></select></div>
+    <div class="field"><label>Prazo</label>
+      <select id="fDueType" style="margin-bottom:6px;"><option value="data">Data específica</option><option value="na">N/A — sem prazo</option><option value="continuo">Contínuo</option></select>
+      <input id="fDue" type="date">
+    </div>
+    <div class="field"><label>Peso estratégico</label><select id="fPriority"><option value="media">Médio</option><option value="alta">Alto</option><option value="baixa">Baixo</option></select></div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button id="fDelete" class="btn" style="display:none; background:var(--red-bg); color:var(--red-fg); border:1px solid var(--red-border);">Excluir</button>
+      <button id="fCancel" class="btn btn-line" style="flex:1;">Cancelar</button>
+      <button id="fSave" class="btn btn-accent" style="flex:1;">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ====== CONFIGURAÇÃO DE CONEXÃO ======
+  var SUPABASE_URL = 'https://vbgfnuahuevdtgwyuhnr.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiZ2ZudWFodWV2ZHRnd3l1aG5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NTE4NjQsImV4cCI6MjEwNTMyNzg2NH0.japNW5lpgWt7NWgc2SDWUeS0iTmTNgAXmyAmN6pAOF4';
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  var STATUSES = ['Em desenho','Em negociacao','Nao iniciado','Em andamento','Aguardando terceiro','Bloqueado','Atrasado','Concluido','Suspenso/Pausado'];
+  var STALL_THRESHOLDS = { 'Publicacao': 21, 'default': 7 };
+
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function parseBRDate(input){
+    if(!input) return null;
+    var m = input.trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if(!m) return undefined;
+    var dd = m[1].padStart(2,'0'), mm = m[2].padStart(2,'0'), yyyy = m[3];
+    return yyyy+'-'+mm+'-'+dd;
+  }
+  function toBRDate(iso){ if(!iso) return ''; var p = iso.split('-'); return p[2]+'-'+p[1]+'-'+p[0]; }
+  function askDateBR(message, currentISO){
+    while(true){
+      var input = window.prompt(message, toBRDate(currentISO));
+      if(input===null) return undefined; // cancelou
+      if(input.trim()===''){ return null; } // deixou em branco de propósito
+      var iso = parseBRDate(input);
+      if(iso===undefined){ window.alert('Data inválida. Use o formato DD-MM-AAAA (ex: 27-09-2026).'); continue; }
+      return iso;
+    }
+  }
+  function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+  function fmtDate(iso){ if(!iso) return '—'; var d=new Date(iso+'T00:00:00'); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
+  function dueLabel(item){
+    if(item.dueType==='na') return 'sem prazo (N/A)';
+    if(item.dueType==='continuo') return 'contínuo';
+    return item.due ? ('prazo '+fmtDate(item.due)) : 'sem prazo definido';
+  }
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  var state = { containers: [], items: [], dependencies: [] };
+  var ui = { groupBy:'programa', connectionMode:'hover', view:'portfolio', radarOpen:false, focusContainerId:null, filters:{status:'all', dependsOn:'all', responsible:'all', search:''}, expanded:{}, collapsedItems:{} };
+  function isCollapsed(id, defaultVal){ return (id in ui.collapsedItems) ? ui.collapsedItems[id] : !!defaultVal; }
+
+  // ====== CAMADA DE DADOS (Supabase) ======
+  async function fetchState(){
+    var [cRes, nRes, ncRes, dRes] = await Promise.all([
+      sb.from('containers').select('*'),
+      sb.from('nodes').select('*'),
+      sb.from('node_containers').select('*'),
+      sb.from('dependencies').select('*')
+    ]);
+    var containers = cRes.data || [];
+    var nodes = nRes.data || [];
+    var ncRows = ncRes.data || [];
+    var deps = dRes.data || [];
+
+    var ncByNode = {};
+    ncRows.forEach(function(r){ (ncByNode[r.node_id] = ncByNode[r.node_id]||[]).push(r.container_id); });
+    var depByTarget = {};
+    deps.forEach(function(d){ if((d.kind||'bloqueio')==='bloqueio') depByTarget[d.target_node_id] = d; });
+    var byParent = {};
+    nodes.forEach(function(n){ var p = n.parent_id || '__root__'; (byParent[p]=byParent[p]||[]).push(n); });
+
+    function toAppNode(n){
+      var dep = depByTarget[n.id];
+      return {
+        id:n.id, name:n.name, type:n.type, status:n.status, responsible:n.responsible,
+        dependsOn:n.depends_on, priority:n.priority, due:n.due_date, dueType:n.due_type||'data', lastUpdated:n.last_updated,
+        completedAt:n.completed_at, posX:n.pos_x, posY:n.pos_y, team:n.team, zone:n.zone,
+        blockReason: dep ? dep.reason : n.delay_reason,
+        delayReason: n.delay_reason,
+        blockedByRefId: dep ? dep.source_node_id : null,
+        containerIds: ncByNode[n.id] || []
+      };
+    }
+    var items = (byParent['__root__']||[]).map(function(n){
+      var it = toAppNode(n);
+      it.actions = (byParent[n.id]||[]).map(toAppNode);
+      return it;
+    });
+    return { containers: containers.map(function(c){ return {id:c.id, name:c.name, type:c.type, color:c.color, subtitle:c.subtitle, zone:c.zone, zones:c.zones, posX:c.pos_x, posY:c.pos_y, laneHeight:c.lane_height, laneOrder:c.lane_order, orientation:c.orientation||'horizontal'}; }), items: items,
+      dependencies: deps.map(function(d){ return {id:d.id, source:d.source_node_id, target:d.target_node_id, reason:d.reason, wx:d.waypoint_x, wy:d.waypoint_y, style:d.style||'curve', kind:d.kind||'bloqueio'}; }) };
+  }
+
+  async function refreshAndRender(){
+    document.getElementById('syncStatus').textContent = 'sincronizando...';
+    try {
+      state = await fetchState();
+      document.getElementById('syncStatus').textContent = 'conectado ao banco de dados';
+    } catch(err){
+      document.getElementById('syncStatus').textContent = 'erro ao sincronizar — veja o console';
+      console.error(err);
+    }
+    renderAll();
+  }
+
+  async function dbUpdateNode(id, fields){
+    var payload = {};
+    if('status' in fields) payload.status = fields.status;
+    if('due' in fields) payload.due_date = fields.due;
+    if('dueType' in fields) payload.due_type = fields.dueType;
+    if('delayReason' in fields) payload.delay_reason = fields.delayReason;
+    if('lastUpdated' in fields) payload.last_updated = fields.lastUpdated;
+    if('completedAt' in fields) payload.completed_at = fields.completedAt;
+    if('name' in fields) payload.name = fields.name;
+    if('type' in fields) payload.type = fields.type;
+    if('responsible' in fields) payload.responsible = fields.responsible;
+    if('dependsOn' in fields) payload.depends_on = fields.dependsOn;
+    if('priority' in fields) payload.priority = fields.priority;
+    if('posX' in fields) payload.pos_x = fields.posX;
+    if('posY' in fields) payload.pos_y = fields.posY;
+    if('team' in fields) payload.team = fields.team;
+    if('zone' in fields) payload.zone = fields.zone;
+    var { error } = await sb.from('nodes').update(payload).eq('id', id);
+    if(error){ window.alert('Erro ao salvar: '+error.message); console.error(error); }
+  }
+  async function dbDeleteNode(id){
+    var { error } = await sb.from('nodes').delete().eq('id', id);
+    if(error){ window.alert('Erro ao excluir: '+error.message); console.error(error); return false; }
+    return true;
+  }
+  async function dbDeleteContainer(id){
+    var { error } = await sb.from('containers').delete().eq('id', id);
+    if(error){ window.alert('Erro ao excluir: '+error.message); console.error(error); return false; }
+    return true;
+  }
+  async function dbUpdateContainer(id, fields){
+    var payload = {};
+    if('posX' in fields) payload.pos_x = fields.posX;
+    if('posY' in fields) payload.pos_y = fields.posY;
+    if('zone' in fields) payload.zone = fields.zone;
+    if('laneHeight' in fields) payload.lane_height = fields.laneHeight;
+    if('laneOrder' in fields) payload.lane_order = fields.laneOrder;
+    if('orientation' in fields) payload.orientation = fields.orientation;
+    var { error } = await sb.from('containers').update(payload).eq('id', id);
+    if(error) console.error(error);
+  }
+  async function dbSyncNodeContainers(nodeId, containerIds){
+    await sb.from('node_containers').delete().eq('node_id', nodeId);
+    if(containerIds.length) await sb.from('node_containers').insert(containerIds.map(function(cid){ return {node_id:nodeId, container_id:cid}; }));
+  }
+  async function dbInsertNode(node){
+    var { data, error } = await sb.from('nodes').insert(node).select().single();
+    if(error){ window.alert('Erro ao criar item: '+error.message); console.error(error); return null; }
+    return data;
+  }
+  async function dbInsertNodeContainers(nodeId, containerIds){
+    if(!containerIds.length) return;
+    var rows = containerIds.map(function(cid){ return { node_id: nodeId, container_id: cid }; });
+    var { error } = await sb.from('node_containers').insert(rows);
+    if(error) console.error(error);
+  }
+
+  function findRef(refId){
+    var idx = buildIndex(); return idx[refId];
+  }
+  function buildIndex(){
+    var idx = {};
+    state.items.forEach(function(it){
+      idx[it.id] = {label: it.name, itemId: it.id};
+      (it.actions||[]).forEach(function(a){ idx[a.id] = {label: a.name, itemId: it.id, actionId: a.id, itemName: it.name}; });
+    });
+    return idx;
+  }
+  function findNodeByRef(refId){
+    var ref = findRef(refId); if(!ref) return null;
+    var it = state.items.find(function(i){return i.id===ref.itemId;});
+    if(ref.actionId) return it.actions.find(function(a){return a.id===ref.actionId;});
+    return it;
+  }
+  function flattenAll(){
+    var out = [];
+    state.items.forEach(function(it){ out.push({node:it, refId:it.id}); (it.actions||[]).forEach(function(a){ out.push({node:a, refId:a.id}); }); });
+    return out;
+  }
+  function isBlockingOthers(refId){ return flattenAll().some(function(x){ return x.node.status==='Bloqueado' && x.node.blockedByRefId===refId; }); }
+  function getLinkPartners(refId){
+    var partners = [];
+    var self = findNodeByRef(refId);
+    if(self && self.status==='Bloqueado' && self.blockedByRefId) partners.push(self.blockedByRefId);
+    flattenAll().forEach(function(x){ if(x.node.status==='Bloqueado' && x.node.blockedByRefId===refId) partners.push(x.refId); });
+    return partners;
+  }
+
+  function computeScore(node, refId){
+    var score = 0;
+    if(node.status==='Atrasado') score += 50;
+    else if(node.due && node.dueType!=='na' && node.dueType!=='continuo'){ var d=daysBetween(todayISO(), node.due); if(d<=3) score += Math.max(30-d*5,5); }
+    if(node.dependsOn==='eu') score += 20;
+    if(isBlockingOthers(refId)) score += 25;
+    if(node.priority==='alta') score += 15; else if(node.priority==='media') score += 5;
+    return score;
+  }
+  function priorityTier(score){ if(score>=55) return 'Alta'; if(score>=25) return 'Media'; return 'Baixa'; }
+
+  async function changeStatus(node, refId, newStatus, onDone){
+    var fields = { status:newStatus, lastUpdated: todayISO() };
+    if(newStatus==='Bloqueado'){
+      var reason = window.prompt('O que está bloqueando este item?', node.delayReason||node.blockReason||''); if(reason===null) return;
+      fields.delayReason = reason;
+    }
+    if(newStatus==='Atrasado'){
+      var just = window.prompt('Justificativa do atraso:', node.delayReason||''); if(just===null) return;
+      var novoPrazo = askDateBR('Novo prazo acordado (DD-MM-AAAA):', node.due||todayISO()); if(novoPrazo===undefined) return;
+      fields.delayReason = just; fields.due = novoPrazo;
+    }
+    if(newStatus==='Concluido'){ if(!window.confirm('Confirmar entrega/aceite deste item?')) return; fields.completedAt = todayISO(); }
+    await dbUpdateNode(refId, fields);
+    onDone();
+  }
+
+  function groupItems(){
+    var filtered = applyFilters(state.items);
+    if(ui.focusContainerId){
+      var fc = state.containers.find(function(c){ return c.id===ui.focusContainerId; });
+      if(fc){
+        var items = filtered.filter(function(it){ return it.containerIds.indexOf(fc.id)!==-1; });
+        items.sort(function(a,b){ return computeScore(b,b.id)-computeScore(a,a.id); });
+        return items.length ? [{container:fc, items:items}] : [{container:fc, items:[]}];
+      }
+    }
+    var groups = state.containers.map(function(c){ return {container:c, items: filtered.filter(function(it){ return it.containerIds.indexOf(c.id)!==-1; })}; });
+    var ungrouped = filtered.filter(function(it){ return it.containerIds.length===0; });
+    groups.push({container:{id:'none', name:'Sem Programa/Eixo', color:'#5B6B80', subtitle:'Itens não vinculados a nenhum contêiner'}, items: ungrouped});
+    groups.forEach(function(g){ g.items.sort(function(a,b){ return computeScore(b,b.id)-computeScore(a,a.id); }); });
+    return groups.filter(function(g){ return g.items.length>0; });
+  }
+  function applyFilters(items){
+    var f = ui.filters;
+    return items.filter(function(it){
+      if(f.status==='all' && it.status==='Concluido') return false;
+      if(f.status!=='all' && it.status!==f.status) return false;
+      if(f.dependsOn!=='all' && it.dependsOn!==f.dependsOn) return false;
+      if(f.responsible!=='all' && it.responsible!==f.responsible) return false;
+      if(f.search){
+        var s=f.search.toLowerCase();
+        var hit = it.name.toLowerCase().indexOf(s)!==-1 || (it.responsible||'').toLowerCase().indexOf(s)!==-1;
+        var aHit = (it.actions||[]).some(function(a){ return a.name.toLowerCase().indexOf(s)!==-1; });
+        if(!hit && !aHit) return false;
+      }
+      return true;
+    });
+  }
+
+  function teamChips(item){
+    if(!item.team) return '';
+    var names = item.team.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    if(!names.length) return '';
+    return '<div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:5px; align-items:center;">'+
+      '<span style="font-size:10px; color:var(--muted2);">equipe:</span>'+
+      names.map(function(n){ return '<span style="font-size:10.5px; background:var(--surface-alt); border:1px solid var(--border); border-radius:999px; padding:2px 8px; color:var(--ink);">'+escapeHtml(n)+'</span>'; }).join('')+
+    '</div>';
+  }
+  function containerChips(item){
+    return item.containerIds.map(function(cid){
+      var c = state.containers.find(function(x){return x.id===cid;});
+      return c ? '<span class="chip" style="background:'+c.color+';">'+escapeHtml(c.name)+'</span>' : '';
+    }).join(' ');
+  }
+  function depDotColor(dep){ return dep==='eu'?'#146B52':dep==='terceiro'?'#82909F':'#C6D2E0'; }
+  function depLabel(dep){ return dep==='eu'?'depende de você':dep==='terceiro'?'depende de terceiro':'sem pendência'; }
+
+  function linkButtonHtml(refId){
+    return '<button type="button" data-action="linkDependency" data-noderef="'+refId+'" title="Vincular dependência" style="border:1px solid var(--border); background:var(--surface); border-radius:5px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); flex:0 0 22px;">'+
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"></path><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L12.5 19.5"></path></svg>'+
+    '</button>';
+  }
+  function editButtonHtml(itemId){
+    return '<button type="button" data-action="editItem" data-itemid="'+itemId+'" title="Editar" style="border:1px solid var(--border); background:var(--surface); border-radius:5px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); flex:0 0 22px;">'+
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>'+
+    '</button>';
+  }
+  function deleteActionButtonHtml(refId){
+    return '<button type="button" data-action="deleteAction" data-noderef="'+refId+'" title="Excluir ação" style="border:1px solid var(--border); background:var(--surface); border-radius:5px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); flex:0 0 22px;">'+
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>'+
+    '</button>';
+  }
+  function editActionButtonHtml(refId){
+    return '<button type="button" data-action="editAction" data-noderef="'+refId+'" title="Editar ação" style="border:1px solid var(--border); background:var(--surface); border-radius:5px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); flex:0 0 22px;">'+
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>'+
+    '</button>';
+  }
+
+  function statusTagHtml(node, refId){
+    var s = node.status, isCritical = (s==='Bloqueado'||s==='Atrasado');
+    var opts = STATUSES.map(function(st){ return '<option value="'+st+'"'+(st===s?' selected':'')+'>'+st+'</option>'; }).join('');
+    if(isCritical) return '<select class="statusSelect statusSelect--filled" data-refid="'+refId+'" data-action="changeStatus">'+opts+'</select>';
+    return '<select class="statusSelect" data-refid="'+refId+'" data-action="changeStatus">'+opts+'</select>';
+  }
+
+  function renderActionRow(item, action){
+    var linkChip = '';
+    if(action.status==='Bloqueado'){
+      var target = action.blockedByRefId ? findRef(action.blockedByRefId) : null;
+      var label = target ? (target.label+(target.itemName?' ('+target.itemName+')':'')) : (action.blockReason||'motivo nao especificado');
+      linkChip = '<div style="margin-top:6px;">'+
+        (action.blockedByRefId ? '<button type="button" class="linkChip" data-action="focusLink" data-target="'+action.blockedByRefId+'">Bloqueado por: '+label+'</button>' :
+          '<span style="font-size:11px; color:var(--red-fg); font-weight:600;">Bloqueado — '+label+'</span>')+
+        (action.blockReason ? '<div style="font-size:10.5px; color:var(--muted); margin-top:2px;">'+escapeHtml(action.blockReason)+'</div>' : '')+
+      '</div>';
+    }
+    if(action.status==='Atrasado' && action.delayReason){ linkChip += '<div style="font-size:11px; color:var(--red-fg); margin-top:6px;">Atraso: '+escapeHtml(action.delayReason)+'</div>'; }
+    return '<div class="actionRow" data-noderef="'+action.id+'">'+
+      '<div style="font-size:12.5px; font-weight:600; line-height:1.35;">'+escapeHtml(action.name)+'</div>'+
+      '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px;">'+
+        statusTagHtml(action, action.id)+
+        '<div style="display:flex; align-items:center; gap:6px;">'+linkButtonHtml(action.id)+editActionButtonHtml(action.id)+deleteActionButtonHtml(action.id)+'</div>'+
+      '</div>'+
+      '<div style="display:flex; align-items:center; gap:6px; margin-top:6px; font-size:11px; color:var(--muted);">'+
+        '<span class="depDot" style="background:'+depDotColor(action.dependsOn)+';"></span>'+depLabel(action.dependsOn)+
+        ' · '+dueLabel(action)+
+      '</div>'+linkChip+
+    '</div>';
+  }
+
+  function renderItemCard(item, color, pos, collapsed){
+    var posStyle = pos ? ('position:absolute; left:'+pos.x+'px; top:'+pos.y+'px; width:330px; cursor:grab; ') : '';
+
+    if(collapsed){
+      var st = statusBucketColor(item.status);
+      var doneC = item.actions && item.actions.length ? item.actions.filter(function(a){return a.status==='Concluido';}).length : 0;
+      var totC = item.actions ? item.actions.length : 0;
+      var actionNamesHtml = totC ? '<div style="margin-top:6px; padding-top:6px; border-top:1px solid var(--border);">'+
+        item.actions.map(function(a){
+          var ast = statusBucketColor(a.status);
+          return '<div style="display:flex; align-items:center; gap:6px; padding:2px 0; font-size:10.5px; color:var(--muted);">'+
+            '<span class="depDot" style="background:'+ast+'; flex:0 0 6px;"></span>'+
+            '<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'+escapeHtml(a.name)+'</span>'+
+          '</div>';
+        }).join('')+
+      '</div>' : '';
+      return '<div class="card" data-noderef="'+item.id+'" style="'+posStyle+'border-left:3px solid '+color+'; padding:9px 12px;">'+
+        '<div style="display:flex; align-items:center; gap:8px;">'+
+          '<span class="depDot" style="background:'+st+'; flex:0 0 7px;"></span>'+
+          '<span style="font-size:12.5px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'+escapeHtml(item.name)+'</span>'+
+          '<span style="font-size:10.5px; color:var(--muted2); flex:0 0 auto;">'+item.status+(totC?' · '+doneC+'/'+totC:'')+(item.due?' · '+fmtDate(item.due):'')+'</span>'+
+          '<button type="button" data-action="toggleCardCollapse" data-itemid="'+item.id+'" title="Expandir" style="border:none; background:none; cursor:pointer; color:var(--muted); padding:0; flex:0 0 auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>'+
+        '</div>'+
+        actionNamesHtml+
+      '</div>';
+    }
+
+    var tier = priorityTier(computeScore(item, item.id));
+    var expanded = ui.expanded[item.id];
+    var manyActions = item.actions && item.actions.length > 6;
+    var actionsHtml = (item.actions||[]).map(function(a){ return manyActions ? renderActionRowCompact(a) : renderActionRow(item,a); }).join('');
+    var addActionBtn = '<button type="button" class="btn-ghost" data-action="addAction" data-itemid="'+item.id+'" style="margin-top:10px; display:block;">+ adicionar ação</button>';
+    var actionsBlock = item.actions && item.actions.length ?
+      ('<button type="button" class="btn-ghost" data-action="toggleExpand" data-itemid="'+item.id+'" style="margin-top:10px;">'+(expanded?'▴ recolher ações':'▾ '+item.actions.length+' ação(ões)'+(manyActions?' (lista enxuta)':''))+'</button>'+(expanded?('<div>'+actionsHtml+'</div>'+addActionBtn):'')) :
+      addActionBtn;
+
+    var note = '';
+    if(item.status==='Bloqueado' && item.blockReason) note = '<div style="font-size:11px; color:var(--red-fg); margin-top:7px; font-weight:600;">Bloqueado — '+escapeHtml(item.blockReason)+'</div>';
+    if(item.status==='Atrasado' && item.delayReason) note += '<div style="font-size:11px; color:var(--red-fg); margin-top:7px;">Atraso: '+escapeHtml(item.delayReason)+'</div>';
+    var blocksOthers = isBlockingOthers(item.id);
+    var priorityTag = tier==='Alta' ? '<span class="tag" style="background:var(--red-bg); color:var(--red-fg); border-color:var(--red-border);">prioridade alta</span>' : '';
+    var blocksTag = blocksOthers ? '<span class="tag" style="background:none; color:var(--red-fg); border-color:var(--red-border);">trava outro item</span>' : '';
+
+    var progressHtml = '';
+    if(item.actions && item.actions.length){
+      var done = item.actions.filter(function(a){ return a.status==='Concluido'; }).length;
+      var pct = Math.round(done/item.actions.length*100);
+      progressHtml = '<div style="margin-top:11px;">'+
+        '<div style="font-size:10.5px; color:var(--muted2); margin-bottom:4px;">'+done+' de '+item.actions.length+' ações concluídas · '+pct+'%</div>'+
+        '<div style="height:5px; border-radius:999px; background:var(--border); overflow:hidden;"><div style="height:100%; width:'+pct+'%; background:'+color+'; border-radius:999px;"></div></div>'+
+      '</div>';
+    }
+
+    return '<div class="card" data-noderef="'+item.id+'" style="'+posStyle+'border-left:3px solid '+color+';">'+
+      '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">'+
+        '<div class="itemTitle" style="line-height:1.3;">'+escapeHtml(item.name)+'</div>'+
+        '<button type="button" data-action="toggleCardCollapse" data-itemid="'+item.id+'" title="Recolher" style="border:none; background:none; cursor:pointer; color:var(--muted2); padding:0; flex:0 0 auto; margin-top:2px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>'+
+      '</div>'+
+      '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:9px;">'+
+        statusTagHtml(item, item.id)+
+        '<div style="display:flex; align-items:center; gap:6px;">'+linkButtonHtml(item.id)+editButtonHtml(item.id)+'</div>'+
+      '</div>'+
+      '<div style="margin-top:9px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">'+containerChips(item)+priorityTag+blocksTag+'</div>'+
+      teamChips(item)+
+      progressHtml+
+      '<div style="display:flex; align-items:center; gap:6px; margin-top:10px; font-size:11.5px; color:var(--muted);">'+
+        '<span class="depDot" style="background:'+depDotColor(item.dependsOn)+';"></span>'+depLabel(item.dependsOn)+
+        ' · '+escapeHtml(item.responsible||'sem responsável')+' · '+dueLabel(item)+
+      '</div>'+note+actionsBlock+
+    '</div>';
+  }
+  function renderActionRowCompact(a){
+    var st = statusBucketColor(a.status);
+    return '<div class="actionRow" data-noderef="'+a.id+'" style="display:flex; align-items:center; gap:7px; padding:6px 2px;">'+
+      '<span class="depDot" style="background:'+st+'; flex:0 0 6px;"></span>'+
+      '<span style="font-size:11.5px; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'+escapeHtml(a.name)+'</span>'+
+      '<span style="font-size:10px; color:var(--muted2); flex:0 0 auto;">'+a.status+'</span>'+
+    '</div>';
+  }
+
+  function statusBucketColor(status){
+    if(status==='Concluido') return '#146B52';
+    if(status==='Bloqueado' || status==='Atrasado') return '#AE2043';
+    if(status==='Aguardando terceiro') return '#8A6A06';
+    if(status==='Em andamento') return '#15529E';
+    return '#C3CDD9';
+  }
+  function columnDistribution(items){
+    if(!items.length) return '';
+    var counts = {};
+    items.forEach(function(it){ counts[it.status] = (counts[it.status]||0)+1; });
+    var segs = Object.keys(counts).map(function(s){
+      var pct = (counts[s]/items.length*100).toFixed(1);
+      return '<div style="width:'+pct+'%; background:'+statusBucketColor(s)+';" title="'+s+': '+counts[s]+'"></div>';
+    }).join('');
+    return '<div style="display:flex; height:5px; border-radius:3px; overflow:hidden; margin-top:9px; background:var(--border);">'+segs+'</div>';
+  }
+
+  var FLOW_W_ITEM = 210, FLOW_H_ITEM = 52, FLOW_COL_GAP = 34, FLOW_ROW_GAP = 18, FLOW_ZONE_ROW_H = 40;
+  var DEFAULT_LANE_HEIGHT = 260, MIN_LANE_HEIGHT = 140, LANE_GAP = 30, VERTICAL_LANE_WIDTH = 260;
+  var currentGeom = {}, currentZoneOrder = {};
+
+  function orderedContainers(){
+    return state.containers.slice().sort(function(a,b){
+      var oa = a.laneOrder!=null ? a.laneOrder : 999999, ob = b.laneOrder!=null ? b.laneOrder : 999999;
+      return oa - ob;
+    });
+  }
+  function moveLane(containerId, direction){
+    var ordered = orderedContainers().filter(function(c){ return c.orientation!=='vertical'; });
+    ordered.forEach(function(c,i){ if(c.laneOrder==null) c.laneOrder = i; });
+    var idx = ordered.findIndex(function(c){ return c.id===containerId; });
+    var swapIdx = idx + direction;
+    if(idx<0 || swapIdx<0 || swapIdx>=ordered.length) return;
+    var a = ordered[idx], b = ordered[swapIdx];
+    var tmp = a.laneOrder; a.laneOrder = b.laneOrder; b.laneOrder = tmp;
+    Promise.all([dbUpdateContainer(a.id, {laneOrder:a.laneOrder}), dbUpdateContainer(b.id, {laneOrder:b.laneOrder})]).then(function(){ renderFlowchart(); });
+  }
+
+  function bandKeyForRef(refId){
+    var ref = findRef(refId);
+    var itemId = ref ? ref.itemId : refId;
+    var it = state.items.find(function(i){return i.id===itemId;});
+    return (it && it.containerIds[0]) || 'none';
+  }
+  function absX(refId){ var node = findNodeByRef(refId); var key = bandKeyForRef(refId); var g = currentGeom[key]||{x:16}; return g.x + (node ? (node.posX||0) : 0); }
+  function absY(refId){ var node = findNodeByRef(refId); var key = bandKeyForRef(refId); var g = currentGeom[key]||{y:16}; return g.y + (node ? (node.posY||0) : 0); }
+
+  function ensureFlowLayout(){
+    var toSave = [];
+    var bandZoneRowIdx = {}; var bandZoneOrder = {};
+    var orientationOf = {}; state.containers.forEach(function(c){ orientationOf[c.id] = c.orientation; });
+    state.items.forEach(function(it){
+      var cKey = it.containerIds[0] || 'none';
+      var isVertical = orientationOf[cKey]==='vertical';
+      var zKey = isVertical ? '' : (it.zone || '');
+      if(!bandZoneOrder[cKey]) bandZoneOrder[cKey] = [];
+      if(bandZoneOrder[cKey].indexOf(zKey)===-1) bandZoneOrder[cKey].push(zKey);
+      var zoneRow = bandZoneOrder[cKey].indexOf(zKey);
+      var comboKey = cKey+'|'+zoneRow;
+      if(!(comboKey in bandZoneRowIdx)) bandZoneRowIdx[comboKey] = 0;
+      var idx = bandZoneRowIdx[comboKey];
+      if(it.posX==null || it.posY==null){
+        if(isVertical){ it.posX = 14; it.posY = 40 + idx*(FLOW_H_ITEM+FLOW_ROW_GAP); }
+        else { it.posX = 40 + idx*(FLOW_W_ITEM+FLOW_COL_GAP); it.posY = 46 + zoneRow*(FLOW_H_ITEM+FLOW_ZONE_ROW_H); }
+        toSave.push({id:it.id, x:it.posX, y:it.posY});
+      }
+      bandZoneRowIdx[comboKey] = idx+1;
+    });
+    return { toSave: toSave, bandZoneOrder: bandZoneOrder };
+  }
+
+  function flowNodeSize(refId){
+    return {w:FLOW_W_ITEM,h:FLOW_H_ITEM};
+  }
+  function itemIdForRef(refId){
+    var ref = findRef(refId);
+    return ref ? ref.itemId : refId;
+  }
+  function snapItemToGrid(node, bandKey){
+    var c = state.containers.find(function(x){return x.id===bandKey;});
+    var isVert = c && c.orientation==='vertical';
+    var g = currentGeom[bandKey] || {w:9999,h:9999};
+    if(isVert){
+      var rowH = FLOW_H_ITEM+FLOW_ROW_GAP;
+      node.posX = 14;
+      node.posY = Math.max(4, Math.round((node.posY-40)/rowH)*rowH + 40);
+    } else {
+      var colW = FLOW_W_ITEM+FLOW_COL_GAP, rowH2 = FLOW_H_ITEM+FLOW_ZONE_ROW_H;
+      node.posX = Math.max(4, Math.round((node.posX-40)/colW)*colW + 40);
+      node.posY = Math.max(4, Math.round((node.posY-46)/rowH2)*rowH2 + 46);
+    }
+    node.posX = Math.min(node.posX, Math.max(4, g.w-FLOW_W_ITEM-4));
+    node.posY = Math.min(node.posY, Math.max(4, g.h-FLOW_H_ITEM-4));
+  }
+
+  var flowDrag = null;
+
+  function renderFlowchart(){
+    var layoutSave = ensureFlowLayout();
+    if(layoutSave.toSave.length){ layoutSave.toSave.forEach(function(s){ dbUpdateNode(s.id, {posX:s.x, posY:s.y}); }); }
+    currentZoneOrder = layoutSave.bandZoneOrder || {};
+
+    var horizontal = orderedContainers().filter(function(c){ return c.orientation!=='vertical'; });
+    var vertical = orderedContainers().filter(function(c){ return c.orientation==='vertical'; });
+
+    var geom = {}; var cum = 16;
+    horizontal.forEach(function(c){
+      var h = c.laneHeight || DEFAULT_LANE_HEIGHT;
+      geom[c.id] = { x:16, y:cum, h:h, vertical:false };
+      cum += h + LANE_GAP;
+    });
+    geom['none'] = { x:16, y:cum, h:DEFAULT_LANE_HEIGHT, vertical:false };
+    cum += DEFAULT_LANE_HEIGHT + LANE_GAP;
+    var totalHeight = cum;
+    currentGeom = geom;
+
+    var mainAreaWidth = 700;
+    state.items.forEach(function(it){
+      var key = it.containerIds[0] || 'none';
+      if(geom[key] && !geom[key].vertical){
+        mainAreaWidth = Math.max(mainAreaWidth, absX(it.id)+FLOW_W_ITEM+40);
+      }
+    });
+    Object.keys(geom).forEach(function(k){ geom[k].w = mainAreaWidth-16; });
+    vertical.forEach(function(c, i){
+      geom[c.id] = { x: mainAreaWidth + 16 + i*(VERTICAL_LANE_WIDTH+LANE_GAP), y:16, w:VERTICAL_LANE_WIDTH, h: totalHeight-32, vertical:true };
+    });
+    currentGeom = geom;
+
+    var maxX = mainAreaWidth + 32 + vertical.length*(VERTICAL_LANE_WIDTH+LANE_GAP);
+    var maxY = totalHeight;
+
+    var canvas = document.getElementById('flowchartCanvas');
+    var hKeys = horizontal.map(function(c){return c.id;}).concat(['none']);
+    var regions = hKeys.map(function(key, ki){
+      var c = key==='none' ? {id:'none', name:'Sem Programa/Eixo', color:'#5B6B80'} : state.containers.find(function(x){return x.id===key;});
+      if(!c) return '';
+      var g = geom[key]; var isNone = key==='none';
+      var upBtn = (!isNone && ki>0) ? '<button type="button" data-action="moveLaneUp" data-containerid="'+key+'" title="Mover para cima" style="border:none; background:none; cursor:pointer; color:'+c.color+'; padding:0; opacity:0.7;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>' : '';
+      var downBtn = (!isNone && ki<hKeys.length-2) ? '<button type="button" data-action="moveLaneDown" data-containerid="'+key+'" title="Mover para baixo" style="border:none; background:none; cursor:pointer; color:'+c.color+'; padding:0; opacity:0.7;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>' : '';
+      var zoneLabels = (currentZoneOrder[key]||[]).map(function(zName, zi){
+        if(!zName) return '';
+        return '<div style="position:absolute; left:34px; top:'+(46+zi*(FLOW_H_ITEM+FLOW_ZONE_ROW_H)-16)+'px; font-size:9.5px; font-weight:700; color:var(--muted);">'+escapeHtml(zName)+'</div>';
+      }).join('');
+      return '<div style="position:absolute; left:'+g.x+'px; top:'+g.y+'px; width:'+g.w+'px; height:'+g.h+'px; background:'+c.color+'10; border:1.5px dashed '+c.color+'55; border-radius:14px;">'+
+        '<div style="position:absolute; left:14px; top:-10px; background:var(--bg); padding:0 6px; display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:'+c.color+';">'+upBtn+downBtn+'<span>'+escapeHtml(c.name)+'</span></div>'+
+        zoneLabels +
+        (!isNone ? '<div class="lane-resize" data-containerid="'+key+'" title="Arraste para ajustar a altura desta banda" style="position:absolute; left:50%; transform:translateX(-50%); bottom:-9px; width:60px; height:14px; cursor:ns-resize; background:'+c.color+'; border-radius:6px; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.25);"><div style="width:26px; height:3px; border-radius:2px; background:rgba(255,255,255,0.85);"></div></div>' : '')+
+      '</div>';
+    }).join('');
+    var vRegions = vertical.map(function(c){
+      var g = geom[c.id];
+      return '<div style="position:absolute; left:'+g.x+'px; top:'+g.y+'px; width:'+g.w+'px; height:'+g.h+'px; background:'+c.color+'10; border:1.5px dashed '+c.color+'55; border-radius:14px;">'+
+        '<div style="position:absolute; left:50%; top:14px; transform:translateX(-50%); background:var(--bg); padding:0 6px; font-size:11px; font-weight:700; color:'+c.color+'; white-space:nowrap;">'+escapeHtml(c.name)+' · transversal</div>'+
+      '</div>';
+    }).join('');
+
+    var nodesHtml = state.items.map(function(it){
+      var st = statusBucketColor(it.status);
+      return '<div class="flow-node" data-noderef="'+it.id+'" style="position:absolute; left:'+absX(it.id)+'px; top:'+absY(it.id)+'px; width:'+FLOW_W_ITEM+'px; min-height:'+FLOW_H_ITEM+'px; background:var(--surface); border:1.5px solid '+st+'; border-radius:8px; padding:8px 10px; cursor:grab; box-shadow:0 2px 6px rgba(10,15,25,0.08); user-select:none;">'+
+        '<div style="font-size:12px; font-weight:700; line-height:1.25; max-height:2.6em; overflow:hidden;">'+escapeHtml(it.name)+'</div>'+
+        '<div style="display:flex; align-items:center; gap:5px; margin-top:5px;"><span class="depDot" style="background:'+st+';"></span><span style="font-size:9.5px; color:var(--muted2);">'+it.status+'</span></div>'+
+        '<div class="flow-handle" data-noderef="'+it.id+'" title="Arraste até outro item para criar conexão" style="position:absolute; right:-7px; top:50%; margin-top:-6px; width:12px; height:12px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); cursor:crosshair;"></div>'+
+      '</div>';
+    }).join('');
+
+    canvas.innerHTML = '<div style="font-size:11.5px; color:var(--muted2); margin-bottom:10px;">Arraste um cartão para reposicionar · arraste a bolinha da borda até outro para criar uma conexão (<span style="color:#AE2043; font-weight:600;">vermelho = bloqueia</span>, <span style="color:#15529E; font-weight:600;">azul = apenas encadeamento</span>) · clique no pontinho de uma linha para alternar curva/ângulo reto, arraste para reposicioná-lo · arraste a base de uma banda para redimensioná-la</div>'+
+      '<div id="flowInner" style="position:relative; width:'+maxX+'px; height:'+maxY+'px; background-image:radial-gradient(circle, rgba(15,27,45,0.06) 1.2px, transparent 1.2px); background-size:22px 22px; border:1px solid var(--border); border-radius:10px;">'+
+        regions + vRegions +
+        '<svg id="flowEdges" width="'+maxX+'" height="'+maxY+'" style="position:absolute; top:0; left:0; pointer-events:none;"></svg>'+
+        nodesHtml +
+      '</div>';
+    renderFlowEdges();
+  }
+
+  function renderFlowEdges(extraLine){
+    var svg = document.getElementById('flowEdges'); if(!svg) return;
+    var defs = '<defs>'+
+      '<marker id="flowArrowBlock" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#AE2043"></path></marker>'+
+      '<marker id="flowArrowChain" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#15529E"></path></marker>'+
+    '</defs>';
+    var paths = '';
+    (state.dependencies||[]).forEach(function(dep){
+      var sourceItemId = itemIdForRef(dep.source), targetItemId = itemIdForRef(dep.target);
+      if(!findNodeByRef(sourceItemId) || !findNodeByRef(targetItemId) || sourceItemId===targetItemId) return;
+      var isBlock = (dep.kind||'bloqueio')==='bloqueio';
+      var color = isBlock ? '#AE2043' : '#15529E';
+      var x1=absX(sourceItemId)+FLOW_W_ITEM, y1=absY(sourceItemId)+FLOW_H_ITEM/2, x2=absX(targetItemId), y2=absY(targetItemId)+FLOW_H_ITEM/2;
+      var wx = dep.wx!=null ? dep.wx : (x1+x2)/2;
+      var wy = dep.wy!=null ? dep.wy : (y1+y2)/2;
+      var isOrtho = dep.style==='orthogonal';
+      var pathD = isOrtho ? ('M '+x1+' '+y1+' L '+wx+' '+y1+' L '+wx+' '+y2+' L '+x2+' '+y2) : ('M '+x1+' '+y1+' Q '+wx+' '+wy+' '+x2+' '+y2);
+      var handleY = isOrtho ? (y1+y2)/2 : wy;
+      paths += '<path d="'+pathD+'" stroke="'+color+'" stroke-width="2.2" stroke-dasharray="'+(isBlock?'1 6':'4 4')+'" stroke-linecap="round" fill="none" marker-end="url('+(isBlock?'#flowArrowBlock':'#flowArrowChain')+')"></path>';
+      paths += '<circle class="flow-waypoint" data-depid="'+dep.id+'" cx="'+wx+'" cy="'+handleY+'" r="5" fill="#FFFFFF" stroke="'+color+'" stroke-width="2" style="cursor:grab; pointer-events:all;"></circle>';
+      paths += '<circle class="flow-endpoint" data-depid="'+dep.id+'" data-end="source" cx="'+x1+'" cy="'+y1+'" r="6" fill="'+color+'" stroke="#FFFFFF" stroke-width="1.5" style="cursor:grab; pointer-events:all;" title="Arraste para mudar a origem"></circle>';
+      paths += '<circle class="flow-endpoint" data-depid="'+dep.id+'" data-end="target" cx="'+x2+'" cy="'+y2+'" r="6" fill="'+color+'" stroke="#FFFFFF" stroke-width="1.5" style="cursor:grab; pointer-events:all;" title="Arraste para mudar o destino"></circle>';
+      paths += '<circle class="flow-edit-icon" data-depid="'+dep.id+'" cx="'+wx+'" cy="'+(handleY-16)+'" r="7" fill="var(--surface)" stroke="'+color+'" stroke-width="1.5" style="cursor:pointer; pointer-events:all;" title="Editar motivo/tipo desta conexão"></circle>'+
+        '<text x="'+wx+'" y="'+(handleY-16+3)+'" font-size="9" font-weight="700" text-anchor="middle" fill="'+color+'" style="pointer-events:none;">i</text>';
+    });
+    if(extraLine){ paths += '<line x1="'+extraLine.x1+'" y1="'+extraLine.y1+'" x2="'+extraLine.x2+'" y2="'+extraLine.y2+'" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4"></line>'; }
+    svg.innerHTML = defs + paths;
+  }
+
+  document.getElementById('flowchartCanvas').addEventListener('click', function(e){
+    var up = e.target.closest('[data-action="moveLaneUp"]');
+    if(up){ moveLane(up.getAttribute('data-containerid'), -1); return; }
+    var down = e.target.closest('[data-action="moveLaneDown"]');
+    if(down){ moveLane(down.getAttribute('data-containerid'), 1); return; }
+    var editIcon = e.target.closest('.flow-edit-icon');
+    if(editIcon){
+      var depId = editIcon.getAttribute('data-depid');
+      var dep = (state.dependencies||[]).find(function(d){ return d.id===depId; });
+      if(!dep) return;
+      var newReason = window.prompt('Motivo/descrição da conexão:', dep.reason||'');
+      if(newReason===null) return;
+      var isBlock = window.confirm('Essa conexão TRAVA o item de destino?\n\nOK = bloqueio\nCancelar = apenas encadeamento');
+      var newKind = isBlock ? 'bloqueio' : 'encadeamento';
+      sb.from('dependencies').update({ reason:newReason||null, kind:newKind }).eq('id', depId).then(function(){
+        dep.reason = newReason||null; dep.kind = newKind;
+        if(newKind==='bloqueio'){
+          return dbUpdateNode(itemIdForRef(dep.target), { status:'Bloqueado', delayReason:newReason, lastUpdated: todayISO() });
+        }
+      }).then(refreshAndRender);
+      return;
+    }
+  });
+  document.getElementById('flowchartCanvas').addEventListener('mousedown', function(e){
+    var laneResize = e.target.closest('.lane-resize');
+    var ep = e.target.closest('.flow-endpoint');
+    var wp = e.target.closest('.flow-waypoint');
+    var handle = e.target.closest('.flow-handle');
+    var nodeEl = e.target.closest('.flow-node');
+    var inner = document.getElementById('flowInner');
+    if(laneResize){
+      var cid = laneResize.getAttribute('data-containerid');
+      var c = state.containers.find(function(x){return x.id===cid;});
+      flowDrag = { mode:'resizeBand', containerId:cid, startY:e.clientY, startHeight: c.laneHeight||DEFAULT_LANE_HEIGHT, c:c };
+      e.preventDefault();
+      return;
+    }
+    if(ep){
+      var depId2 = ep.getAttribute('data-depid');
+      var end = ep.getAttribute('data-end');
+      var dep2 = state.dependencies.find(function(d){ return d.id===depId2; });
+      if(dep2){ flowDrag = { mode:'endpoint', depId:depId2, dep:dep2, end:end }; e.preventDefault(); }
+      return;
+    }
+    if(wp){
+      var depId = wp.getAttribute('data-depid');
+      var dep = state.dependencies.find(function(d){ return d.id===depId; });
+      if(dep){ flowDrag = { mode:'waypoint', depId:depId, dep:dep, startX:e.clientX, startY:e.clientY, moved:false }; e.preventDefault(); }
+      return;
+    }
+    if(handle){
+      var refId = handle.getAttribute('data-noderef');
+      var sz = flowNodeSize(refId);
+      flowDrag = { mode:'connect', refId:refId, x1:absX(refId)+sz.w, y1:absY(refId)+sz.h/2 };
+      e.preventDefault();
+      return;
+    }
+    if(nodeEl){
+      var refId2 = nodeEl.getAttribute('data-noderef');
+      var innerRect = inner.getBoundingClientRect();
+      flowDrag = { mode:'move', refId:refId2, el:nodeEl, offsetX: e.clientX - innerRect.left - parseFloat(nodeEl.style.left), offsetY: e.clientY - innerRect.top - parseFloat(nodeEl.style.top), innerRect:innerRect };
+      nodeEl.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!flowDrag) return;
+    if(flowDrag.mode==='move'){
+      var bandKey = bandKeyForRef(flowDrag.refId);
+      var g = currentGeom[bandKey] || {x:0,y:0,w:9999,h:9999};
+      var rawX = e.clientX - flowDrag.innerRect.left - flowDrag.offsetX;
+      var rawY = e.clientY - flowDrag.innerRect.top - flowDrag.offsetY;
+      var minX = g.x+4, maxX = Math.max(minX, g.x+g.w-FLOW_W_ITEM-4);
+      var minY = g.y+4, maxY = Math.max(minY, g.y+g.h-FLOW_H_ITEM-4);
+      var nx = Math.min(Math.max(rawX, minX), maxX);
+      var ny = Math.min(Math.max(rawY, minY), maxY);
+      flowDrag.el.style.left = nx+'px'; flowDrag.el.style.top = ny+'px';
+      var node = findNodeByRef(flowDrag.refId);
+      node.posX = nx - g.x; node.posY = ny - g.y;
+      renderFlowEdges();
+    } else if(flowDrag.mode==='connect'){
+      var inner = document.getElementById('flowInner'); var rect = inner.getBoundingClientRect();
+      renderFlowEdges({ x1:flowDrag.x1, y1:flowDrag.y1, x2:e.clientX-rect.left, y2:e.clientY-rect.top });
+    } else if(flowDrag.mode==='endpoint'){
+      var innerR2 = document.getElementById('flowInner').getBoundingClientRect();
+      var otherItemId = flowDrag.end==='source' ? itemIdForRef(flowDrag.dep.target) : itemIdForRef(flowDrag.dep.source);
+      var ox = absX(otherItemId)+FLOW_W_ITEM/2, oy = absY(otherItemId)+FLOW_H_ITEM/2;
+      renderFlowEdges({ x1: ox, y1: oy, x2: e.clientX-innerR2.left, y2: e.clientY-innerR2.top });
+    } else if(flowDrag.mode==='waypoint'){
+      if(!flowDrag.moved && (Math.abs(e.clientX-flowDrag.startX)>4 || Math.abs(e.clientY-flowDrag.startY)>4)) flowDrag.moved = true;
+      if(flowDrag.moved){
+        var innerEl = document.getElementById('flowInner'); var iRect = innerEl.getBoundingClientRect();
+        flowDrag.dep.wx = e.clientX - iRect.left; flowDrag.dep.wy = e.clientY - iRect.top;
+        renderFlowEdges();
+      }
+    } else if(flowDrag.mode==='resizeBand'){
+      var dy = e.clientY - flowDrag.startY;
+      var newH = Math.max(MIN_LANE_HEIGHT, Math.round(flowDrag.startHeight + dy));
+      flowDrag.c.laneHeight = newH;
+      renderFlowchart();
+    }
+  });
+  document.addEventListener('mouseup', function(e){
+    if(!flowDrag) return;
+    if(flowDrag.mode==='move'){
+      var node = findNodeByRef(flowDrag.refId);
+      var bandKey = bandKeyForRef(flowDrag.refId);
+      snapItemToGrid(node, bandKey);
+      dbUpdateNode(flowDrag.refId, { posX: Math.round(node.posX), posY: Math.round(node.posY) });
+      flowDrag.el.style.cursor='grab';
+      renderFlowchart();
+    } else if(flowDrag.mode==='connect'){
+      var target = document.elementFromPoint(e.clientX, e.clientY);
+      var targetNodeEl = target ? target.closest('.flow-node') : null;
+      if(targetNodeEl && targetNodeEl.getAttribute('data-noderef')!==flowDrag.refId){
+        var targetRef = targetNodeEl.getAttribute('data-noderef');
+        var isBlock = window.confirm('Essa conexão TRAVA o item de destino (ele fica Bloqueado até isso resolver)?\n\nOK = trava (dependência de bloqueio)\nCancelar = apenas encadeamento (mostra o fluxo, sem bloquear nada)');
+        var reason = isBlock ? window.prompt('Motivo do bloqueio:', '') : null;
+        if(!isBlock || reason!==null){
+          var payload = { source_node_id: flowDrag.refId, target_node_id: targetRef, reason: reason||null, kind: isBlock?'bloqueio':'encadeamento' };
+          sb.from('dependencies').insert(payload).then(function(){
+            if(isBlock) return dbUpdateNode(targetRef, { status:'Bloqueado', delayReason: reason, lastUpdated: todayISO() });
+          }).then(refreshAndRender);
+        }
+      }
+      renderFlowEdges();
+    } else if(flowDrag.mode==='endpoint'){
+      var target2 = document.elementFromPoint(e.clientX, e.clientY);
+      var targetNodeEl2 = target2 ? target2.closest('.flow-node') : null;
+      if(targetNodeEl2){
+        var newRef = targetNodeEl2.getAttribute('data-noderef');
+        var otherRef = flowDrag.end==='source' ? itemIdForRef(flowDrag.dep.target) : itemIdForRef(flowDrag.dep.source);
+        if(newRef!==otherRef){
+          var updatePayload = flowDrag.end==='source' ? {source_node_id:newRef} : {target_node_id:newRef};
+          sb.from('dependencies').update(updatePayload).eq('id', flowDrag.depId).then(function(){
+            if(flowDrag.end==='source'){ flowDrag.dep.source = newRef; }
+            else {
+              flowDrag.dep.target = newRef;
+              if((flowDrag.dep.kind||'bloqueio')==='bloqueio') return dbUpdateNode(newRef, { status:'Bloqueado', delayReason: flowDrag.dep.reason, lastUpdated: todayISO() });
+            }
+          }).then(refreshAndRender);
+        } else { renderFlowEdges(); }
+      } else { renderFlowEdges(); }
+    } else if(flowDrag.mode==='waypoint'){
+      if(flowDrag.moved){
+        sb.from('dependencies').update({ waypoint_x: Math.round(flowDrag.dep.wx), waypoint_y: Math.round(flowDrag.dep.wy) }).eq('id', flowDrag.depId).then(function(){});
+      } else {
+        var newStyle = flowDrag.dep.style==='orthogonal' ? 'curve' : 'orthogonal';
+        flowDrag.dep.style = newStyle;
+        sb.from('dependencies').update({ style: newStyle }).eq('id', flowDrag.depId).then(function(){ renderFlowEdges(); });
+      }
+    } else if(flowDrag.mode==='resizeBand'){
+      dbUpdateContainer(flowDrag.containerId, { laneHeight: Math.round(flowDrag.c.laneHeight) });
+    }
+    flowDrag = null;
+  });
+
+  function renderCompleted(){
+    var contSel = document.getElementById('completedContainer');
+    if(!contSel.dataset.filled){
+      contSel.innerHTML = '<option value="all">Programa/Eixo: todos</option>'+state.containers.map(function(c){ return '<option value="'+c.id+'">'+escapeHtml(c.name)+'</option>'; }).join('');
+      contSel.dataset.filled = '1';
+    }
+    var containerFilter = contSel.value;
+    var from = document.getElementById('completedFrom').value;
+    var to = document.getElementById('completedTo').value;
+
+    var all = flattenAll().filter(function(x){ return x.node.status==='Concluido' && x.node.completedAt; });
+    if(containerFilter!=='all'){
+      all = all.filter(function(x){
+        var ref = findRef(x.refId);
+        var it = state.items.find(function(i){return i.id===(ref.itemId||x.refId);});
+        return it && it.containerIds.indexOf(containerFilter)!==-1;
+      });
+    }
+    if(from){ all = all.filter(function(x){ return x.node.completedAt.slice(0,7) >= from; }); }
+    if(to){ all = all.filter(function(x){ return x.node.completedAt.slice(0,7) <= to; }); }
+    all.sort(function(a,b){ return b.node.completedAt.localeCompare(a.node.completedAt); });
+
+    var byMonth = {};
+    all.forEach(function(x){ var m=x.node.completedAt.slice(0,7); byMonth[m]=(byMonth[m]||0)+1; });
+    var months = Object.keys(byMonth).sort();
+    document.getElementById('completedSummary').innerHTML =
+      '<div style="display:flex; align-items:baseline; gap:6px;"><span style="font-size:19px; font-weight:600; font-family:\'IBM Plex Mono\',monospace;">'+all.length+'</span><span style="font-size:11.5px; color:var(--muted2);">concluídos no período</span></div>'+
+      (months.length ? '<div style="display:flex; align-items:baseline; gap:6px;"><span style="font-size:19px; font-weight:600; font-family:\'IBM Plex Mono\',monospace;">'+(all.length/months.length).toFixed(1)+'</span><span style="font-size:11.5px; color:var(--muted2);">média por mês</span></div>' : '');
+
+    document.getElementById('completedList').innerHTML = all.length ? all.map(function(x){
+      var ref = findRef(x.refId);
+      var parent = ref && ref.itemName ? ' — '+escapeHtml(ref.itemName) : '';
+      return '<div style="border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:baseline; gap:10px;">'+
+        '<div><div style="font-size:13.5px; font-weight:600;">'+escapeHtml(x.node.name)+parent+'</div>'+
+        '<div style="font-size:11.5px; color:var(--muted2); margin-top:2px;">'+escapeHtml(x.node.responsible||'')+'</div></div>'+
+        '<div style="font-size:12px; color:var(--muted); white-space:nowrap;">'+fmtDate(x.node.completedAt)+'</div>'+
+      '</div>';
+    }).join('') : '<div style="color:var(--muted2); font-size:13px;">Nenhum item concluído nesse recorte.</div>';
+  }
+
+  var PAGE_TITLES = { portfolio:'Portfólio', board:'Quadro', flow:'Fluxograma', completed:'Concluídos' };
+
+  function ensurePortfolioLayout(containers){
+    var toSave = [];
+    containers.forEach(function(c, i){
+      if(c.posX==null || c.posY==null){
+        var col = i % 3, row = Math.floor(i/3);
+        var x = 40 + col*340, y = 40 + row*230;
+        c.posX = x; c.posY = y;
+        toSave.push({id:c.id, x:x, y:y});
+      }
+    });
+    if(toSave.length) toSave.forEach(function(s){ dbUpdateContainer(s.id, {posX:s.x, posY:s.y}); });
+  }
+
+  function renderPortfolio(){
+    function healthFor(containerId){
+      var items = state.items.filter(function(it){ return it.containerIds.indexOf(containerId)!==-1; });
+      var critical = 0, dependVoce = 0, prazoProximo = 0, concluidos = 0;
+      var respSet = {};
+      items.forEach(function(it){
+        if(it.responsible) respSet[it.responsible]=true;
+        if(it.status==='Concluido') concluidos++;
+        if(it.status==='Bloqueado' || it.status==='Atrasado') critical++;
+        if(it.dependsOn==='eu' && it.status!=='Concluido') dependVoce++;
+        if(it.due && it.dueType!=='na' && it.dueType!=='continuo' && it.status!=='Concluido' && daysBetween(todayISO(),it.due)<=7) prazoProximo++;
+        (it.actions||[]).forEach(function(a){
+          if(a.status==='Bloqueado' || a.status==='Atrasado') critical++;
+          if(a.dependsOn==='eu' && a.status!=='Concluido') dependVoce++;
+          if(a.due && a.dueType!=='na' && a.dueType!=='continuo' && a.status!=='Concluido' && daysBetween(todayISO(),a.due)<=7) prazoProximo++;
+        });
+      });
+      return { items:items, critical:critical, dependVoce:dependVoce, prazoProximo:prazoProximo, concluidos:concluidos, respCount:Object.keys(respSet).length };
+    }
+    var containers = state.containers;
+    var wrap = document.getElementById('portfolioWrap');
+    if(!containers.length){
+      wrap.innerHTML = '<div style="color:var(--muted2); font-size:13px;">Nenhum Programa/Eixo cadastrado ainda. Use "+ Programa/Eixo" para começar.</div>';
+      return;
+    }
+    ensurePortfolioLayout(containers);
+    var maxX=900, maxY=300;
+    containers.forEach(function(c){ maxX=Math.max(maxX,(c.posX||0)+330); maxY=Math.max(maxY,(c.posY||0)+230); });
+
+    var cards = containers.map(function(c){
+      var h = healthFor(c.id);
+      function stat(n,label,color){ return n ? '<span style="font-size:11px; color:'+(color||'var(--muted)')+';">'+n+' '+label+'</span>' : ''; }
+      var statsLine = [stat(h.critical,'crítico(s)','var(--red-fg)'), stat(h.prazoProximo,'prazo(s) em 7 dias','var(--amber-fg)'), stat(h.dependVoce,'com você'), stat(h.respCount,'responsáve(is)'), stat(h.concluidos,'concluído(s)','var(--success-fg)')].filter(Boolean).join(' · ');
+      var zoneTag = c.zone ? '<span class="tag" style="background:var(--surface-alt); color:var(--muted); border-color:var(--border); margin-top:6px; display:inline-flex;">'+escapeHtml(c.zone)+'</span>' : '';
+      return '<div class="card" data-containerid="'+c.id+'" style="position:absolute; left:'+(c.posX||0)+'px; top:'+(c.posY||0)+'px; width:310px; cursor:grab; border-left:3px solid '+c.color+';">'+
+        '<div style="display:flex; align-items:center; justify-content:space-between;">'+
+          '<div style="display:flex; align-items:center; gap:7px;"><span style="font-size:15px; font-weight:700; color:'+c.color+';">'+escapeHtml(c.name)+'</span>'+
+            '<button type="button" data-action="editContainer" data-containerid="'+c.id+'" title="Editar" style="border:none; background:none; cursor:pointer; color:var(--muted2); padding:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>'+
+          '</div>'+
+          (h.critical ? '<span class="tag" style="background:var(--red-bg); color:var(--red-fg); border-color:var(--red-border);">'+h.critical+' crítico(s)</span>' : '')+
+        '</div>'+
+        zoneTag+
+        '<div style="font-size:11.5px; color:var(--muted2); margin-top:6px;">'+escapeHtml(c.subtitle||'')+(c.subtitle?' · ':'')+h.items.length+' item(ns)</div>'+
+        columnDistribution(h.items)+
+        (statsLine ? '<div style="margin-top:9px;">'+statsLine+'</div>' : '')+
+      '</div>';
+    });
+    wrap.innerHTML = '<div style="font-size:12px; color:var(--muted2); margin-bottom:14px;">Arraste um cartão para reorganizar · clique para abrir o quadro focado nele</div>'+
+      '<div style="position:relative; width:'+maxX+'px; height:'+maxY+'px;">'+cards.join('')+'</div>';
+  }
+
+  function setView(view){
+    ui.view = view;
+    if(view!=='board') ui.focusContainerId = null;
+    document.getElementById('pageTitle').textContent = ui.focusContainerId ?
+      (state.containers.find(function(c){return c.id===ui.focusContainerId;})||{}).name || 'Quadro' : PAGE_TITLES[view];
+    document.querySelectorAll('.nav-btn[data-view]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-view')===view); });
+    document.getElementById('portfolioWrap').style.display = view==='portfolio' ? 'block' : 'none';
+    document.getElementById('board').style.display = view==='board' ? 'block' : 'none';
+    document.getElementById('flowWrap').style.display = view==='flow' ? 'block' : 'none';
+    document.getElementById('completedWrap').style.display = view==='completed' ? 'block' : 'none';
+    document.getElementById('boardSettingsRow').style.display = view==='board' ? 'flex' : 'none';
+    updateFocusBadge();
+    if(view==='portfolio') renderPortfolio();
+    if(view==='board'){ renderBoard(); redrawConnectorsForMode(); }
+    if(view==='flow') renderFlowchart();
+    if(view==='completed') renderCompleted();
+  }
+  function updateFocusBadge(){
+    var badge = document.getElementById('focusBadge');
+    if(ui.view==='board' && ui.focusContainerId){
+      var c = state.containers.find(function(x){return x.id===ui.focusContainerId;});
+      badge.style.display='flex';
+      badge.innerHTML = '<span style="font-size:12px; color:var(--muted);">Focado em <strong style="color:var(--ink);">'+escapeHtml(c?c.name:'')+'</strong></span>'+
+        '<button type="button" id="btnClearFocus" class="btn-ghost">ver todos</button>';
+      document.getElementById('btnClearFocus').addEventListener('click', function(){ ui.focusContainerId=null; setView('board'); renderBoard(); redrawConnectorsForMode(); });
+    } else {
+      badge.style.display='none'; badge.innerHTML='';
+    }
+  }
+  function updateSegButtons(){
+    document.querySelectorAll('.seg-btn[data-group]').forEach(function(b){
+      var group = b.getAttribute('data-group'), val = b.getAttribute('data-val');
+      b.classList.toggle('active', ui[group]===val);
+    });
+  }
+  function updateRadarDrawer(){
+    var drawer = document.getElementById('radarDrawer'), backdrop = document.getElementById('radarBackdrop'), btn = document.getElementById('btnToggleRadar');
+    drawer.style.transform = ui.radarOpen ? 'translateX(0)' : 'translateX(100%)';
+    backdrop.style.display = ui.radarOpen ? 'block' : 'none';
+    btn.classList.toggle('active', ui.radarOpen);
+  }
+
+  function ensureBoardLayout(items){
+    var toSave = [];
+    items.forEach(function(it, i){
+      if(it.posX==null || it.posY==null){
+        var col = i % 2, row = Math.floor(i/2);
+        var x = 40 + col*370, y = 40 + row*300;
+        it.posX = x; it.posY = y;
+        toSave.push({id:it.id, x:x, y:y});
+      }
+    });
+    if(toSave.length) toSave.forEach(function(s){ dbUpdateNode(s.id, {posX:s.x, posY:s.y}); });
+  }
+
+  function renderBoard(){
+    var groups = groupItems();
+    var columnsEl = document.getElementById('columns');
+
+    if(ui.focusContainerId && groups.length){
+      var g = groups[0];
+      var hasZones = g.items.some(function(it){ return it.zone; });
+
+      if(hasZones){
+        var zones = {};
+        g.items.forEach(function(it){ var z = it.zone || 'Sem zona'; (zones[z]=zones[z]||[]).push(it); });
+        var zoneNames = Object.keys(zones);
+        columnsEl.style.cssText = 'display:flex; align-items:flex-start; position:relative;';
+        columnsEl.innerHTML = zoneNames.map(function(zname, i){
+          var isLast = i===zoneNames.length-1;
+          var sep = isLast ? 'padding-right:2px;' : 'padding-right:44px; margin-right:44px; border-right:1px solid var(--border);';
+          var renameBtn = zname!=='Sem zona' ? '<button type="button" data-action="renameZone" data-zone="'+escapeHtml(zname)+'" data-containerid="'+g.container.id+'" title="Renomear zona" style="border:none; background:none; cursor:pointer; color:var(--muted2); padding:0; margin-left:6px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>' : '';
+          return '<div style="width:308px; flex:0 0 308px; '+sep+'">'+
+            '<div class="colHeader" style="border-color:'+g.container.color+';">'+
+              '<div style="display:flex; align-items:center; font-size:14px; font-weight:700; color:'+g.container.color+';">'+escapeHtml(zname)+renameBtn+'</div>'+
+              '<div style="font-size:11px; color:var(--muted2); margin-top:3px;">'+zones[zname].length+' item(ns)</div>'+
+              columnDistribution(zones[zname])+
+            '</div>'+
+            zones[zname].map(function(it){ return renderItemCard(it, g.container.color, null, isCollapsed(it.id, true)); }).join('')+
+          '</div>';
+        }).join('');
+        return;
+      }
+
+      ensureBoardLayout(g.items);
+      var maxX=740, maxY=400;
+      g.items.forEach(function(it){ maxX=Math.max(maxX,(it.posX||0)+370); maxY=Math.max(maxY,(it.posY||0)+320); });
+      columnsEl.style.cssText = 'position:relative; width:'+maxX+'px; height:'+maxY+'px;';
+      columnsEl.innerHTML = g.items.length ?
+        g.items.map(function(it){ return renderItemCard(it, g.container.color, {x:it.posX||0, y:it.posY||0}, isCollapsed(it.id, g.items.length>6)); }).join('') :
+        '<div style="color:var(--muted2); padding:20px;">Nenhum item corresponde aos filtros atuais.</div>';
+      return;
+    }
+
+    columnsEl.style.cssText = 'display:flex; align-items:flex-start; position:relative;';
+    var html = groups.map(function(g,i){
+      var isLast = i===groups.length-1;
+      var sep = isLast ? 'padding-right:2px;' : 'padding-right:44px; margin-right:44px; border-right:1px solid var(--border);';
+      var editContainerBtn = g.container.id!=='none' ? '<button type="button" data-action="editContainer" data-containerid="'+g.container.id+'" title="Editar Programa/Eixo" style="border:none; background:none; cursor:pointer; color:var(--muted2); padding:0; margin-left:8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>' : '';
+      return '<div style="width:308px; flex:0 0 308px; '+sep+'">'+
+        '<div class="colHeader" style="border-color:'+g.container.color+';">'+
+          '<div style="display:flex; align-items:center; font-size:15px; font-weight:700; color:'+g.container.color+';">'+escapeHtml(g.container.name)+editContainerBtn+'</div>'+
+          '<div style="font-size:11px; color:var(--muted2); margin-top:3px;">'+escapeHtml(g.container.subtitle||'')+' · '+g.items.length+' item(ns)</div>'+
+          columnDistribution(g.items)+
+        '</div>'+
+        g.items.map(function(it){ return renderItemCard(it, g.container.color); }).join('')+
+      '</div>';
+    }).join('');
+    document.getElementById('columns').innerHTML = html || '<div style="color:var(--muted2); padding:20px;">Nenhum item corresponde aos filtros atuais.</div>';
+  }
+
+  var boardDrag = null;
+  document.getElementById('columns').addEventListener('mousedown', function(e){
+    if(!ui.focusContainerId) return;
+    if(e.target.closest('select, button, input, .btn-ghost, .linkChip')) return;
+    var card = e.target.closest('.card[data-noderef]');
+    if(!card) return;
+    var parentRect = document.getElementById('columns').getBoundingClientRect();
+    boardDrag = { refId: card.getAttribute('data-noderef'), el: card,
+      offsetX: e.clientX - parentRect.left - parseFloat(card.style.left||0),
+      offsetY: e.clientY - parentRect.top - parseFloat(card.style.top||0), parentRect: parentRect };
+    card.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!boardDrag) return;
+    var nx = Math.max(0, e.clientX - boardDrag.parentRect.left - boardDrag.offsetX);
+    var ny = Math.max(0, e.clientY - boardDrag.parentRect.top - boardDrag.offsetY);
+    boardDrag.el.style.left = nx+'px'; boardDrag.el.style.top = ny+'px';
+    var node = findNodeByRef(boardDrag.refId); node.posX = nx; node.posY = ny;
+    if(ui.connectionMode==='always') redrawConnectorsForMode();
+  });
+  document.addEventListener('mouseup', function(){
+    if(!boardDrag) return;
+    var node = findNodeByRef(boardDrag.refId);
+    dbUpdateNode(boardDrag.refId, { posX: Math.round(node.posX), posY: Math.round(node.posY) });
+    boardDrag.el.style.cursor = 'grab';
+    boardDrag = null;
+  });
+
+  function computeAnchor(srcRect, tgtRect, rect){
+    var x1,y1,x2,y2;
+    if(srcRect.right <= tgtRect.left){ x1=srcRect.right-rect.left; y1=srcRect.top-rect.top+srcRect.height/2; x2=tgtRect.left-rect.left; y2=tgtRect.top-rect.top+tgtRect.height/2; }
+    else if(tgtRect.right <= srcRect.left){ x1=srcRect.left-rect.left; y1=srcRect.top-rect.top+srcRect.height/2; x2=tgtRect.right-rect.left; y2=tgtRect.top-rect.top+tgtRect.height/2; }
+    else { x1=srcRect.left-rect.left+srcRect.width/2; y1=srcRect.bottom-rect.top; x2=tgtRect.left-rect.left+tgtRect.width/2; y2=tgtRect.top-rect.top; }
+    return [x1,y1,x2,y2];
+  }
+  function findVisibleNode(refId){
+    var el = document.querySelector('#columns [data-noderef="'+refId+'"]');
+    if(el) return el;
+    var ref = findRef(refId);
+    if(ref && ref.itemId) return document.querySelector('#columns [data-noderef="'+ref.itemId+'"]');
+    return null;
+  }
+  function renderAllConnectors(){
+    var columns = document.getElementById('columns');
+    var svg = document.getElementById('connectorSvg');
+    var rect = columns.getBoundingClientRect();
+    var paths = '<defs><marker id="arrowhead2" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#AE2043"></path></marker></defs>';
+    flattenAll().forEach(function(x){
+      if(x.node.status==='Bloqueado' && x.node.blockedByRefId){
+        var srcEl = findVisibleNode(x.node.blockedByRefId), tgtEl = findVisibleNode(x.refId);
+        if(srcEl && tgtEl && srcEl!==tgtEl){
+          var sr=srcEl.getBoundingClientRect(), tr=tgtEl.getBoundingClientRect();
+          var a = computeAnchor(sr,tr,rect); var midX=(a[0]+a[2])/2;
+          paths += '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="4" fill="#AE2043"></circle>'+
+            '<path d="M '+a[0]+' '+a[1]+' C '+midX+' '+a[1]+', '+midX+' '+a[3]+', '+a[2]+' '+a[3]+'" stroke="#AE2043" stroke-width="2.2" stroke-dasharray="1 6" stroke-linecap="round" fill="none" marker-end="url(#arrowhead2)"></path>';
+        }
+      }
+    });
+    var w=Math.max(columns.scrollWidth,rect.width), h=Math.max(columns.scrollHeight,rect.height);
+    svg.setAttribute('width',w); svg.setAttribute('height',h); svg.style.width=w+'px'; svg.style.height=h+'px';
+    svg.innerHTML = paths;
+  }
+  function redrawConnectorsForMode(){ if(ui.connectionMode==='always') requestAnimationFrame(renderAllConnectors); else clearHighlight(); }
+  function highlightLink(refId, partners){
+    var columns = document.getElementById('columns'), svg = document.getElementById('connectorSvg');
+    var rect = columns.getBoundingClientRect();
+    var selfEl = document.querySelector('#columns [data-noderef="'+refId+'"]'); if(!selfEl) return;
+    selfEl.classList.add('linked');
+    var selfNode = findNodeByRef(refId);
+    var paths = '<defs><marker id="arrowhead2" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#AE2043"></path></marker></defs>';
+    partners.forEach(function(pRef){
+      var pEl = document.querySelector('#columns [data-noderef="'+pRef+'"]'); if(!pEl) return;
+      pEl.classList.add('linked');
+      var sr=selfEl.getBoundingClientRect(), tr=pEl.getBoundingClientRect();
+      var blocking = (selfNode && selfNode.blockedByRefId===pRef);
+      var srcRect = blocking?tr:sr, tgtRect = blocking?sr:tr;
+      var a = computeAnchor(srcRect,tgtRect,rect); var midX=(a[0]+a[2])/2;
+      paths += '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="4" fill="#AE2043"></circle>'+
+        '<path d="M '+a[0]+' '+a[1]+' C '+midX+' '+a[1]+', '+midX+' '+a[3]+', '+a[2]+' '+a[3]+'" stroke="#AE2043" stroke-width="2.4" stroke-dasharray="1 6" stroke-linecap="round" fill="none" marker-end="url(#arrowhead2)"></path>';
+    });
+    var w=Math.max(columns.scrollWidth,rect.width), h=Math.max(columns.scrollHeight,rect.height);
+    svg.setAttribute('width',w); svg.setAttribute('height',h); svg.style.width=w+'px'; svg.style.height=h+'px';
+    svg.innerHTML = paths;
+  }
+  function clearHighlight(){
+    document.querySelectorAll('#columns .linked').forEach(function(el){ el.classList.remove('linked'); });
+    document.getElementById('connectorSvg').innerHTML='';
+  }
+
+  function renderRadar(){
+    var all = flattenAll();
+    var blocked = all.filter(function(x){ return x.node.status==='Bloqueado'; });
+    var deadlines = all.filter(function(x){ return x.node.due && x.node.dueType!=='na' && x.node.dueType!=='continuo' && x.node.status!=='Concluido'; }).map(function(x){ x.diff=daysBetween(todayISO(),x.node.due); return x; }).filter(function(x){ return x.diff<=3; }).sort(function(a,b){return a.diff-b.diff;});
+    var stalled = all.filter(function(x){ if(x.node.status==='Concluido') return false; var th=STALL_THRESHOLDS[x.node.type]||STALL_THRESHOLDS['default']; return daysBetween(x.node.lastUpdated||todayISO(),todayISO())>=th; }).sort(function(a,b){return daysBetween(b.node.lastUpdated,todayISO())-daysBetween(a.node.lastUpdated,todayISO());});
+    function section(title,color,list,renderer){ if(!list.length) return ''; return '<div class="eyebrow" style="color:'+color+'; margin:16px 0 9px;">'+title+' · '+list.length+'</div><div style="display:flex; flex-direction:column; gap:8px;">'+list.map(renderer).join('')+'</div>'; }
+    var html = '';
+    html += section('Dependências críticas','var(--red-fg)',blocked,function(x){ return '<div style="border:1px solid var(--border); border-radius:7px; padding:10px 12px;"><div style="font-size:12.5px; font-weight:600;">'+escapeHtml(x.node.name)+'</div><div style="font-size:11px; color:var(--muted2); margin-top:3px;">'+escapeHtml(x.node.blockReason||'sem detalhe')+'</div></div>'; });
+    html += section('Prazos vencendo/vencidos','var(--amber-fg)',deadlines,function(x){ var l=x.diff<0?('vencido há '+Math.abs(x.diff)+' dia(s)'):(x.diff===0?'vence hoje':'vence em '+x.diff+' dia(s)'); return '<div style="border:1px solid var(--border); border-radius:7px; padding:10px 12px;"><div style="font-size:12.5px; font-weight:600;">'+escapeHtml(x.node.name)+'</div><div style="font-size:11px; color:'+(x.diff<0?'var(--red-fg)':'var(--amber-fg)')+'; margin-top:3px;">'+l+'</div></div>'; });
+    html += section('Itens parados','var(--muted)',stalled,function(x){ var d=daysBetween(x.node.lastUpdated,todayISO()); return '<div style="border:1px solid var(--border); border-radius:7px; padding:10px 12px;"><div style="font-size:12.5px; font-weight:600;">'+escapeHtml(x.node.name)+'</div><div style="font-size:11px; color:var(--muted); margin-top:3px;">sem atualização há '+d+' dia(s)</div></div>'; });
+    document.getElementById('radar').innerHTML = html || '<div style="color:var(--muted2); font-size:12px;">Nada pedindo atenção agora.</div>';
+  }
+
+  function renderBigNumbers(){
+    var all = flattenAll();
+    var total = all.length, atrasados = all.filter(function(x){return x.node.status==='Atrasado';}).length;
+    var dependVoce = all.filter(function(x){return x.node.dependsOn==='eu' && x.node.status!=='Concluido';}).length;
+    var concluidos = all.filter(function(x){return x.node.status==='Concluido';}).length;
+    function stat(n,l,c){ return '<div style="display:flex; align-items:baseline; gap:6px;"><span style="font-size:19px; font-weight:600; font-family:\'IBM Plex Mono\',monospace; color:'+(c||'var(--ink)')+';">'+n+'</span><span style="font-size:11.5px; color:var(--muted2);">'+l+'</span></div>'; }
+    document.getElementById('bigNumbers').innerHTML = stat(total,'itens ativos')+stat(atrasados,'atrasados','var(--red-fg)')+stat(dependVoce,'dependem de você','var(--amber-fg)')+stat(concluidos,'concluídos','var(--success-fg)');
+  }
+
+  function refreshFilterOptions(){
+    var sSel = document.getElementById('filterStatus');
+    sSel.innerHTML = '<option value="all">Status: todos</option>'+STATUSES.map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
+    sSel.value = ui.filters.status;
+    var resp = Array.from(new Set(state.items.map(function(i){return i.responsible;}).filter(Boolean)));
+    var rSel = document.getElementById('filterResponsible');
+    rSel.innerHTML = '<option value="all">Responsável: todos</option>'+resp.map(function(r){return '<option value="'+r+'">'+r+'</option>';}).join('');
+    rSel.value = ui.filters.responsible;
+    document.getElementById('filterDependsOn').value = ui.filters.dependsOn;
+  }
+  function renderAll(){
+    renderRadar(); renderBigNumbers(); refreshFilterOptions(); updateSegButtons(); updateRadarDrawer(); updateFocusBadge();
+    if(ui.view==='portfolio') renderPortfolio();
+    if(ui.view==='board'){ renderBoard(); redrawConnectorsForMode(); }
+    if(ui.view==='flow') renderFlowchart();
+    if(ui.view==='completed') renderCompleted();
+  }
+
+  function defaultExpand(){
+    var exp = {};
+    state.items.forEach(function(it){ (it.actions||[]).forEach(function(a){ if(a.status==='Bloqueado' && a.blockedByRefId){ exp[it.id]=true; var ref=findRef(a.blockedByRefId); if(ref&&ref.itemId) exp[ref.itemId]=true; } }); });
+    return exp;
+  }
+
+  var columnsEl = document.getElementById('columns');
+  columnsEl.addEventListener('click', function(e){
+    var toggle = e.target.closest('[data-action="toggleExpand"]');
+    if(toggle){ var id=toggle.getAttribute('data-itemid'); ui.expanded[id]=!ui.expanded[id]; renderBoard(); redrawConnectorsForMode(); return; }
+    var toggleCollapse = e.target.closest('[data-action="toggleCardCollapse"]');
+    if(toggleCollapse){ var cid=toggleCollapse.getAttribute('data-itemid'); ui.collapsedItems[cid] = !isCollapsed(cid); renderBoard(); redrawConnectorsForMode(); return; }
+    var addAct = e.target.closest('[data-action="addAction"]');
+    if(addAct){
+      var itemId = addAct.getAttribute('data-itemid');
+      var item = state.items.find(function(i){return i.id===itemId;});
+      var name = window.prompt('Nome da nova ação:'); if(!name) return;
+      var due = askDateBR('Prazo (DD-MM-AAAA), ou deixe em branco:', null); if(due===undefined) return;
+      dbInsertNode({ parent_id:itemId, name:name, status:'Nao iniciado', responsible:item.responsible, depends_on:'eu', due_date:due||null, last_updated: todayISO() })
+        .then(function(){ ui.expanded[itemId]=true; refreshAndRender(); });
+      return;
+    }
+    var link = e.target.closest('[data-action="focusLink"]');
+    if(link){
+      var target = link.getAttribute('data-target');
+      var selfCard = link.closest('[data-noderef]');
+      var selfRef = selfCard ? selfCard.getAttribute('data-noderef') : null;
+      var el = document.querySelector('#columns [data-noderef="'+target+'"]');
+      if(el) el.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+      setTimeout(function(){ if(selfRef) highlightLink(selfRef, [target]); }, 380);
+      setTimeout(clearHighlight, 2400);
+      return;
+    }
+    var linkDep = e.target.closest('[data-action="linkDependency"]');
+    if(linkDep){ openDepForm(linkDep.getAttribute('data-noderef')); return; }
+    var editBtn = e.target.closest('[data-action="editItem"]');
+    if(editBtn){
+      var editItem = state.items.find(function(i){ return i.id===editBtn.getAttribute('data-itemid'); });
+      if(editItem) openForm(editItem);
+      return;
+    }
+    var delAction = e.target.closest('[data-action="deleteAction"]');
+    if(delAction){
+      if(window.confirm('Excluir esta ação? Não tem como desfazer.')){
+        dbDeleteNode(delAction.getAttribute('data-noderef')).then(refreshAndRender);
+      }
+      return;
+    }
+    var editAct = e.target.closest('[data-action="editAction"]');
+    if(editAct){
+      var refId = editAct.getAttribute('data-noderef');
+      var action = findNodeByRef(refId);
+      var newName = window.prompt('Nome da ação:', action.name);
+      if(newName===null) return;
+      var newResp = window.prompt('Responsável:', action.responsible||'');
+      if(newResp===null) return;
+      var newDue = askDateBR('Prazo (DD-MM-AAAA), ou deixe em branco:', action.due);
+      if(newDue===undefined) return;
+      dbUpdateNode(refId, { name:newName.trim()||action.name, responsible:newResp.trim(), due:newDue }).then(refreshAndRender);
+      return;
+    }
+    var editC = e.target.closest('[data-action="editContainer"]');
+    if(editC){
+      var c = state.containers.find(function(x){ return x.id===editC.getAttribute('data-containerid'); });
+      if(c) openContainerForm(c);
+      return;
+    }
+    var renameZ = e.target.closest('[data-action="renameZone"]');
+    if(renameZ){
+      var oldZone = renameZ.getAttribute('data-zone');
+      var cid = renameZ.getAttribute('data-containerid');
+      var newZone = window.prompt('Novo nome para a zona "'+oldZone+'":', oldZone);
+      if(newZone===null || !newZone.trim() || newZone.trim()===oldZone) return;
+      newZone = newZone.trim();
+      var affected = flattenAll().filter(function(x){ return x.node.zone===oldZone; });
+      var tasks = affected.map(function(x){ return dbUpdateNode(x.refId, { zone: newZone }); });
+      var cont = state.containers.find(function(c){ return c.id===cid; });
+      if(cont){
+        var list = cont.zones ? cont.zones.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+        var pos = list.indexOf(oldZone);
+        if(pos!==-1) list[pos] = newZone; else list.push(newZone);
+        tasks.push(dbUpdateContainer(cid, { zones: list.join(',') }));
+      }
+      Promise.all(tasks).then(refreshAndRender);
+      return;
+    }
+  });
+  columnsEl.addEventListener('change', function(e){
+    var sel = e.target.closest('[data-action="changeStatus"]');
+    if(sel){
+      var refId = sel.getAttribute('data-refid');
+      var node = findNodeByRef(refId);
+      changeStatus(node, refId, sel.value, function(){ refreshAndRender(); });
+    }
+  });
+  columnsEl.addEventListener('mouseover', function(e){
+    if(ui.connectionMode==='always') return;
+    var el = e.target.closest('[data-noderef]'); if(!el) return;
+    if(el.dataset.hoverLock) return;
+    var partners = getLinkPartners(el.getAttribute('data-noderef')); if(!partners.length) return;
+    el.dataset.hoverLock='1'; highlightLink(el.getAttribute('data-noderef'), partners);
+  });
+  columnsEl.addEventListener('mouseout', function(e){
+    if(ui.connectionMode==='always') return;
+    var el = e.target.closest('[data-noderef]'); if(!el) return;
+    if(!el.contains(e.relatedTarget)){ delete el.dataset.hoverLock; clearHighlight(); }
+  });
+
+  document.getElementById('navRail').addEventListener('click', function(e){
+    var vBtn = e.target.closest('.nav-btn[data-view]');
+    if(vBtn){ ui.focusContainerId=null; setView(vBtn.getAttribute('data-view')); return; }
+  });
+  document.getElementById('btnToggleRadar').addEventListener('click', function(){ ui.radarOpen=!ui.radarOpen; updateRadarDrawer(); });
+  document.getElementById('btnCloseRadar').addEventListener('click', function(){ ui.radarOpen=false; updateRadarDrawer(); });
+  document.getElementById('radarBackdrop').addEventListener('click', function(){ ui.radarOpen=false; updateRadarDrawer(); });
+  document.getElementById('boardSettingsRow').addEventListener('click', function(e){
+    var seg = e.target.closest('.seg-btn[data-group]');
+    if(seg){ ui[seg.getAttribute('data-group')] = seg.getAttribute('data-val'); updateSegButtons(); if(seg.getAttribute('data-group')==='groupBy'){ renderBoard(); redrawConnectorsForMode(); } else { redrawConnectorsForMode(); } }
+  });
+  document.getElementById('portfolioWrap').addEventListener('click', function(e){
+    var editC = e.target.closest('[data-action="editContainer"]');
+    if(editC){
+      var c = state.containers.find(function(x){ return x.id===editC.getAttribute('data-containerid'); });
+      if(c) openContainerForm(c);
+      return;
+    }
+  });
+  var portfolioDrag = null;
+  document.getElementById('portfolioWrap').addEventListener('mousedown', function(e){
+    if(e.target.closest('button')) return;
+    var card = e.target.closest('.card[data-containerid]');
+    if(!card) return;
+    var parent = card.parentElement;
+    var parentRect = parent.getBoundingClientRect();
+    portfolioDrag = { id: card.getAttribute('data-containerid'), el: card, moved:false, startX:e.clientX, startY:e.clientY,
+      offsetX: e.clientX - parentRect.left - parseFloat(card.style.left||0),
+      offsetY: e.clientY - parentRect.top - parseFloat(card.style.top||0), parentRect: parentRect };
+    card.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!portfolioDrag) return;
+    if(!portfolioDrag.moved && (Math.abs(e.clientX-portfolioDrag.startX)>4 || Math.abs(e.clientY-portfolioDrag.startY)>4)) portfolioDrag.moved = true;
+    if(!portfolioDrag.moved) return;
+    var nx = Math.max(0, e.clientX - portfolioDrag.parentRect.left - portfolioDrag.offsetX);
+    var ny = Math.max(0, e.clientY - portfolioDrag.parentRect.top - portfolioDrag.offsetY);
+    portfolioDrag.el.style.left = nx+'px'; portfolioDrag.el.style.top = ny+'px';
+    var c = state.containers.find(function(x){return x.id===portfolioDrag.id;}); c.posX = nx; c.posY = ny;
+  });
+  document.addEventListener('mouseup', function(){
+    if(!portfolioDrag) return;
+    if(portfolioDrag.moved){
+      var c = state.containers.find(function(x){return x.id===portfolioDrag.id;});
+      dbUpdateContainer(portfolioDrag.id, { posX: Math.round(c.posX), posY: Math.round(c.posY) });
+    } else {
+      ui.focusContainerId = portfolioDrag.id; setView('board');
+    }
+    portfolioDrag.el.style.cursor = 'grab';
+    portfolioDrag = null;
+  });
+  document.getElementById('completedContainer').addEventListener('change', renderCompleted);
+  document.getElementById('completedFrom').addEventListener('change', renderCompleted);
+  document.getElementById('completedTo').addEventListener('change', renderCompleted);
+  document.getElementById('btnCompletedClear').addEventListener('click', function(){
+    document.getElementById('completedContainer').value='all'; document.getElementById('completedFrom').value=''; document.getElementById('completedTo').value='';
+    renderCompleted();
+  });
+  document.getElementById('filterStatus').addEventListener('change', function(e){ ui.filters.status=e.target.value; renderBoard(); redrawConnectorsForMode(); });
+  document.getElementById('filterDependsOn').addEventListener('change', function(e){ ui.filters.dependsOn=e.target.value; renderBoard(); redrawConnectorsForMode(); });
+  document.getElementById('filterResponsible').addEventListener('change', function(e){ ui.filters.responsible=e.target.value; renderBoard(); redrawConnectorsForMode(); });
+  document.getElementById('btnClearFilters').addEventListener('click', function(){ ui.filters={status:'all',dependsOn:'all',responsible:'all',search:ui.filters.search}; renderAll(); });
+  document.getElementById('searchInput').addEventListener('input', function(e){ ui.filters.search=e.target.value; renderBoard(); redrawConnectorsForMode(); });
+  document.getElementById('btnRefresh').addEventListener('click', refreshAndRender);
+  window.addEventListener('resize', function(){ redrawConnectorsForMode(); });
+
+  var containerOverlay = document.getElementById('containerFormOverlay');
+  var editingContainerId = null;
+  var formZonesList = [];
+  function renderCZonesList(){
+    document.getElementById('cZonesList').innerHTML = formZonesList.map(function(z){
+      return '<span class="chip" style="background:var(--surface-alt); color:var(--ink); border:1px solid var(--border); display:inline-flex; align-items:center; gap:5px;">'+escapeHtml(z)+
+        '<button type="button" data-zone="'+escapeHtml(z)+'" style="border:none; background:none; cursor:pointer; color:var(--muted); padding:0; display:flex;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>'+
+      '</span>';
+    }).join('') || '<span style="font-size:11.5px; color:var(--muted2);">nenhuma zona ainda</span>';
+  }
+  document.getElementById('cZonesList').addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-zone]');
+    if(btn){ formZonesList = formZonesList.filter(function(z){ return z!==btn.getAttribute('data-zone'); }); renderCZonesList(); }
+  });
+  document.getElementById('cZoneAdd').addEventListener('click', function(){
+    var v = document.getElementById('cZoneNew').value.trim();
+    if(v && formZonesList.indexOf(v)===-1){ formZonesList.push(v); renderCZonesList(); }
+    document.getElementById('cZoneNew').value = '';
+  });
+
+  function openContainerForm(container){
+    editingContainerId = container ? container.id : null;
+    document.getElementById('containerFormTitle').textContent = container ? 'Editar Programa/Eixo' : 'Novo Programa/Eixo';
+    document.getElementById('cName').value = container ? container.name : '';
+    document.getElementById('cZone').value = container ? (container.zone||'') : '';
+    document.getElementById('cOrientation').value = container ? (container.orientation||'horizontal') : 'horizontal';
+    document.getElementById('cLaneHeight').value = container ? (container.laneHeight||260) : 260;
+    document.getElementById('cSubtitle').value = container ? (container.subtitle||'') : '';
+    document.getElementById('cColor').value = container ? container.color : '#15529E';
+    formZonesList = container && container.zones ? container.zones.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+    renderCZonesList();
+    document.getElementById('containerFormError').style.display='none';
+    document.getElementById('cDelete').style.display = container ? 'block' : 'none';
+    containerOverlay.style.display='flex';
+  }
+  document.getElementById('btnNovoContainer').addEventListener('click', function(){ openContainerForm(null); });
+  document.getElementById('cCancel').addEventListener('click', function(){ containerOverlay.style.display='none'; });
+  document.getElementById('cDelete').addEventListener('click', async function(){
+    if(!editingContainerId) return;
+    if(!window.confirm('Excluir este Programa/Eixo? Os projetos que estavam nele NÃO são excluídos, só deixam de pertencer a ele.')) return;
+    await dbDeleteContainer(editingContainerId);
+    containerOverlay.style.display='none';
+    refreshAndRender();
+  });
+  document.getElementById('cSave').addEventListener('click', async function(){
+    var name = document.getElementById('cName').value.trim();
+    var errEl = document.getElementById('containerFormError'); errEl.style.display='none';
+    if(!name){ errEl.textContent='Dê um nome ao Programa/Eixo.'; errEl.style.display='block'; return; }
+    var zone = document.getElementById('cZone').value.trim() || null;
+    var subtitle = document.getElementById('cSubtitle').value.trim() || null;
+    var color = document.getElementById('cColor').value;
+    var orientation = document.getElementById('cOrientation').value;
+    var laneHeight = parseInt(document.getElementById('cLaneHeight').value, 10) || 260;
+    var zonesStr = formZonesList.join(',') || null;
+    if(editingContainerId){
+      var { error } = await sb.from('containers').update({ name:name, type:'programa', zone:zone, subtitle:subtitle, color:color, orientation:orientation, lane_height:laneHeight, zones:zonesStr }).eq('id', editingContainerId);
+      if(error){ errEl.textContent='Erro ao salvar: '+error.message; errEl.style.display='block'; return; }
+    } else {
+      var { error: insErr } = await sb.from('containers').insert({ name:name, type:'programa', zone:zone, subtitle:subtitle, color:color, orientation:orientation, lane_height:laneHeight, zones:zonesStr });
+      if(insErr){ errEl.textContent='Erro ao salvar: '+insErr.message; errEl.style.display='block'; return; }
+    }
+    containerOverlay.style.display='none';
+    refreshAndRender();
+  });
+
+  var depOverlay = document.getElementById('depFormOverlay');
+  var depTargetRef = null;
+  function openDepForm(refId){
+    depTargetRef = refId;
+    var targetNode = findNodeByRef(refId);
+    document.getElementById('depTargetName').textContent = targetNode ? targetNode.name : '';
+    var options = flattenAll().filter(function(x){ return x.refId!==refId; }).map(function(x){
+      var ref = findRef(x.refId);
+      var label = ref && ref.itemName ? (x.node.name+' — '+ref.itemName) : x.node.name;
+      return '<option value="'+x.refId+'">'+escapeHtml(label)+'</option>';
+    }).join('');
+    document.getElementById('depSourceSelect').innerHTML = '<option value="">— selecione o item que trava —</option>'+options;
+    document.getElementById('depKind').value = 'bloqueio';
+    document.getElementById('depReason').value = (targetNode && (targetNode.blockReason||targetNode.delayReason)) || '';
+    document.getElementById('depFormError').style.display='none';
+    depOverlay.style.display='flex';
+  }
+  document.getElementById('depCancel').addEventListener('click', function(){ depOverlay.style.display='none'; });
+  document.getElementById('depSave').addEventListener('click', async function(){
+    var source = document.getElementById('depSourceSelect').value;
+    var errEl = document.getElementById('depFormError'); errEl.style.display='none';
+    if(!source){ errEl.textContent='Escolha o item que está travando.'; errEl.style.display='block'; return; }
+    var kind = document.getElementById('depKind').value;
+    var reason = document.getElementById('depReason').value.trim();
+    var { error: depErr } = await sb.from('dependencies').insert({ source_node_id: source, target_node_id: depTargetRef, reason: reason || null, kind: kind });
+    if(depErr){ errEl.textContent='Erro ao salvar vínculo: '+depErr.message; errEl.style.display='block'; return; }
+    if(kind==='bloqueio') await dbUpdateNode(depTargetRef, { status:'Bloqueado', delayReason: reason, lastUpdated: todayISO() });
+    depOverlay.style.display='none';
+    refreshAndRender();
+  });
+
+  var overlay = document.getElementById('formOverlay');
+  var editingItemId = null;
+  function primaryCheckedContainer(){
+    var checked = Array.from(document.querySelectorAll('#fContainers input:checked')).map(function(i){return i.value;});
+    if(!checked.length) return null;
+    return state.containers.find(function(c){ return c.id===checked[0]; }) || null;
+  }
+  function refreshFZoneOptions(currentZoneValue){
+    var sel = document.getElementById('fZone');
+    var hint = document.getElementById('fZoneHint');
+    var primary = primaryCheckedContainer();
+    if(!primary){
+      sel.innerHTML = '<option value="">— selecione um Programa/Eixo primeiro —</option>';
+      hint.textContent = '';
+      return;
+    }
+    var zones = primary.zones ? primary.zones.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+    if(currentZoneValue && zones.indexOf(currentZoneValue)===-1) zones.push(currentZoneValue);
+    var opts = '<option value="">— nenhuma —</option>' + zones.map(function(z){ return '<option value="'+escapeHtml(z)+'">'+escapeHtml(z)+'</option>'; }).join('') + '<option value="__new__">+ Nova zona…</option>';
+    sel.innerHTML = opts;
+    sel.value = currentZoneValue || '';
+    hint.textContent = 'zonas de: '+primary.name;
+  }
+  document.getElementById('fContainers').addEventListener('change', function(){ refreshFZoneOptions(document.getElementById('fZone').value==='__new__' ? '' : document.getElementById('fZone').value); });
+  document.getElementById('fZone').addEventListener('change', function(){
+    if(this.value!=='__new__') return;
+    var primary = primaryCheckedContainer();
+    if(!primary){ this.value=''; return; }
+    var novaZona = window.prompt('Nome da nova zona (dentro de "'+primary.name+'"):', '');
+    if(!novaZona || !novaZona.trim()){ this.value=''; return; }
+    novaZona = novaZona.trim();
+    var atuais = primary.zones ? primary.zones.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+    if(atuais.indexOf(novaZona)===-1) atuais.push(novaZona);
+    primary.zones = atuais.join(',');
+    dbUpdateContainer(primary.id, { zones: primary.zones });
+    refreshFZoneOptions(novaZona);
+  });
+
+  function openForm(item){
+    editingItemId = item ? item.id : null;
+    document.getElementById('fTitle').textContent = item ? 'Editar item' : 'Novo projeto';
+    document.getElementById('fContainers').innerHTML = state.containers.map(function(c){
+      var checked = item && item.containerIds.indexOf(c.id)!==-1 ? ' checked' : '';
+      return '<label style="display:flex; align-items:center; gap:7px; font-size:12.5px;"><input type="checkbox" value="'+c.id+'"'+checked+'> '+escapeHtml(c.name)+' <span style="color:var(--muted2); font-size:11px;">('+c.subtitle+')</span></label>';
+    }).join('');
+    document.getElementById('fName').value = item ? item.name : '';
+    document.getElementById('fType').value = item ? (item.type||'Projeto') : 'Projeto';
+    document.getElementById('fResp').value = item ? (item.responsible||'') : 'Evandro';
+    document.getElementById('fTeam').value = item ? (item.team||'') : '';
+    refreshFZoneOptions(item ? (item.zone||'') : '');
+    document.getElementById('fDep').value = item ? (item.dependsOn||'eu') : 'eu';
+    document.getElementById('fDueType').value = item ? (item.dueType||'data') : 'data';
+    document.getElementById('fDue').value = item ? (item.due||'') : '';
+    document.getElementById('fPriority').value = item ? (item.priority||'media') : 'media';
+    document.getElementById('fDelete').style.display = item ? 'block' : 'none';
+    overlay.style.display='flex';
+  }
+  document.getElementById('btnNovo').addEventListener('click', function(){ openForm(null); });
+  document.getElementById('fCancel').addEventListener('click', function(){ overlay.style.display='none'; });
+  document.getElementById('fDelete').addEventListener('click', async function(){
+    if(!editingItemId) return;
+    if(!window.confirm('Excluir este item? Isso também apaga suas ações e vínculos de dependência. Não tem como desfazer.')) return;
+    await dbDeleteNode(editingItemId);
+    overlay.style.display='none';
+    refreshAndRender();
+  });
+  document.getElementById('fSave').addEventListener('click', async function(){
+    var name = document.getElementById('fName').value.trim();
+    if(!name){ window.alert('Dê um nome ao item.'); return; }
+    var containerIds = Array.from(document.querySelectorAll('#fContainers input:checked')).map(function(i){return i.value;});
+    var dueType = document.getElementById('fDueType').value;
+    var dueVal = dueType==='data' ? (document.getElementById('fDue').value||null) : null;
+    var teamVal = document.getElementById('fTeam').value.trim() || null;
+    var zoneValRaw = document.getElementById('fZone').value.trim();
+    var zoneVal = (zoneValRaw && zoneValRaw!=='__new__') ? zoneValRaw : null;
+    if(editingItemId){
+      await dbUpdateNode(editingItemId, {
+        name:name, type: document.getElementById('fType').value, responsible: document.getElementById('fResp').value.trim()||'—',
+        dependsOn: document.getElementById('fDep').value, priority: document.getElementById('fPriority').value,
+        due: dueVal, dueType: dueType, team: teamVal, zone: zoneVal
+      });
+      await dbSyncNodeContainers(editingItemId, containerIds);
+    } else {
+      var newNode = await dbInsertNode({
+        parent_id: null, name:name, type: document.getElementById('fType').value, status:'Nao iniciado',
+        responsible: document.getElementById('fResp').value.trim()||'—', depends_on: document.getElementById('fDep').value,
+        priority: document.getElementById('fPriority').value, due_date: dueVal, due_type: dueType, team: teamVal, zone: zoneVal,
+        last_updated: todayISO()
+      });
+      if(newNode) await dbInsertNodeContainers(newNode.id, containerIds);
+    }
+    overlay.style.display='none';
+    refreshAndRender();
+  });
+
+  // ====== AUTENTICAÇÃO ======
+  function showLogin(){ document.getElementById('loginOverlay').style.display='flex'; document.getElementById('appRoot').style.display='none'; }
+  async function showApp(){
+    document.getElementById('loginOverlay').style.display='none';
+    document.getElementById('appRoot').style.display='flex';
+    state = await fetchState();
+    ui.expanded = defaultExpand();
+    renderRadar(); renderBigNumbers(); refreshFilterOptions(); updateSegButtons(); updateRadarDrawer(); updateFocusBadge();
+    setView('portfolio');
+  }
+  document.getElementById('btnLogin').addEventListener('click', doLogin);
+  document.getElementById('loginPass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+  async function doLogin(){
+    var email = document.getElementById('loginEmail').value.trim();
+    var pass = document.getElementById('loginPass').value;
+    var errEl = document.getElementById('loginError'); errEl.style.display='none';
+    var { error } = await sb.auth.signInWithPassword({ email:email, password:pass });
+    if(error){ errEl.textContent = 'Falha no login: '+error.message; errEl.style.display='block'; return; }
+    showApp();
+  }
+  document.getElementById('btnLogout').addEventListener('click', async function(){ await sb.auth.signOut(); location.reload(); });
+
+  sb.auth.getSession().then(function(res){
+    if(res.data.session) showApp(); else showLogin();
+  });
+})();
+</script>
+</body>
+</html>
